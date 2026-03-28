@@ -22,5 +22,9 @@ router.post("/login", authController.login);
 router.put("/update-profile", protect, upload.single("profilePic"), authController.updateProfile);
 router.put("/change-password", protect, authController.changePassword);
 router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password/:token", authController.resetPassword);
+router.post("/follow/:id", protect, authController.toggleFollow);
+router.get("/following", protect, authController.getFollowing);
+router.get("/connections", protect, authController.getConnections);
 
 module.exports = router;

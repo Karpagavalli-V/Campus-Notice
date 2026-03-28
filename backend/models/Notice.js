@@ -17,9 +17,19 @@ const noticeSchema = new mongoose.Schema(
       default: "General",
     },
 
+    category: {
+      type: String,
+      default: "General",
+    },
+
+    subType: {
+      type: String,
+      default: "",
+    },
+
     priority: {
       type: String,
-      enum: ["high", "medium", "low"],
+      enum: ["emergency", "high", "medium", "low"],
       default: "low",
     },
 
@@ -46,6 +56,46 @@ const noticeSchema = new mongoose.Schema(
       },
     ],
 
+    readBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    reactions: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        type: { type: String, default: "like" }, // like, love, clap, zap, etc.
+      },
+    ],
+    mentions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    poll: {
+      question: String,
+      options: [
+        {
+          text: String,
+          votes: [
+            {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "User",
+            },
+          ],
+        },
+      ],
+    },
+
     comments: [
       {
         user: {
@@ -57,6 +107,47 @@ const noticeSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        likes: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+        ],
+        reactions: [
+          {
+            user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+            type: { type: String, default: "like" },
+          },
+        ],
+        mentions: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+        ],
+        replies: [
+          {
+            user: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "User",
+            },
+            userName: String,
+            text: {
+              type: String,
+              required: true,
+            },
+            likes: [
+              {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+              },
+            ],
+            createdAt: {
+              type: Date,
+              default: Date.now,
+            },
+          },
+        ],
         createdAt: {
           type: Date,
           default: Date.now,

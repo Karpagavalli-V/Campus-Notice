@@ -24,8 +24,18 @@ router.post(
   "/",
   protect,
   authorizeRoles("admin", "faculty"),
-  upload.single("attachment"),
+  upload.array("attachments", 10),
   noticeController.createNotice
+);
+
+// ================= UPDATE NOTICE =================
+// Admin / Faculty
+router.put(
+  "/:id",
+  protect,
+  authorizeRoles("admin", "faculty"),
+  upload.array("attachments", 10),
+  noticeController.updateNotice
 );
 
 // ================= ACTIVE NOTICES =================
@@ -47,17 +57,70 @@ router.get(
 
 
 
+// ================= FACULTY ANALYTICS =================
+router.get(
+  "/stats/me",
+  protect,
+  authorizeRoles("faculty"),
+  noticeController.getMyStats
+);
+
 router.get(
   "/:id",
   protect,
   noticeController.getNoticeById
 );
 
-// ================= ADD COMMENT =================
+// ================= SAVED NOTICES =================
+router.post(
+  "/:id/save",
+  protect,
+  noticeController.toggleSaveNotice
+);
+
+router.get(
+  "/saved/all",
+  protect,
+  noticeController.getSavedNotices
+);
+
+// ================= READ RECEIPTS =================
+router.post(
+  "/:id/read",
+  protect,
+  noticeController.markAsRead
+);
+
+// ================= COMMENTS & REPLIES =================
 router.post(
   "/:id/comment",
   protect,
   noticeController.addComment
+);
+
+router.post(
+  "/:id/comment/:commentId/like",
+  protect,
+  noticeController.toggleLikeComment
+);
+
+router.post(
+  "/:id/comment/:commentId/reply",
+  protect,
+  noticeController.addReply
+);
+
+router.post(
+  "/:id/comment/:commentId/reply/:replyId/like",
+  protect,
+  noticeController.toggleLikeReply
+);
+
+// ================= POLLS =================
+router.post(
+  "/:id/vote",
+  protect,
+  noticeController.voteInPoll
 );
 
 
@@ -71,13 +134,22 @@ router.delete(
 );
 
 // ================= ARCHIVED NOTICES =================
-// Admin only
+// All roles can see archived notices
 router.get(
   "/archive",
   protect,
-  authorizeRoles("admin", "faculty"),
   noticeController.getArchivedNotices
 );
+
+// ================= LIKES =================
+router.post(
+  "/:id/like",
+  protect,
+  noticeController.toggleLikeNotice
+);
+
+router.post("/:id/reaction", protect, noticeController.toggleReaction);
+router.post("/:id/comment/:commentId/reaction", protect, noticeController.toggleCommentReaction);
 
 module.exports = router;
 

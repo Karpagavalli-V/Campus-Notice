@@ -40,6 +40,8 @@ app.use("/api/notices", require("./routes/noticeRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
+app.use("/api/groups", require("./routes/groupRoutes"));
+app.use("/api/search", require("./routes/searchRoutes"));
 
 
 // Test route

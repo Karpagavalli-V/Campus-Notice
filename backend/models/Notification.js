@@ -25,7 +25,7 @@ const notificationSchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["new_notice", "high_priority", "comment_reply"],
+            enum: ["new_notice", "high_priority", "comment_reply", "like", "mention", "reaction"],
             default: "new_notice",
         },
         isRead: {

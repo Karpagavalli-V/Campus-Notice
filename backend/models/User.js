@@ -24,9 +24,56 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Student-specific details
+    department: {
+      type: String,
+      default: "",
+    },
+
+    year: {
+      type: String,
+      default: "",
+    },
+
+    rollNumber: {
+      type: String,
+      default: "",
+    },
+
     profilePic: {
       type: String,
       default: "",
+    },
+
+    savedNotices: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notice",
+      },
+    ],
+
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    // Password reset
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }
