@@ -1,0 +1,126 @@
+.notifications-page {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.notifications-list-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 1rem;
+    min-height: 400px;
+}
+
+.all-notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.notification-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    transition: all 0.2s;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+}
+
+.notification-card:hover {
+    background-color: var(--card-bg);
+    border-color: var(--primary-light);
+}
+
+.notification-card.unread {
+    background-color: rgba(59, 130, 246, 0.08);
+    /* Light blue tint for unread in dark mode */
+    border-left: 4px solid var(--primary-color);
+    border-color: var(--primary-light);
+}
+
+.notif-content {
+    flex: 1;
+}
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.notif-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.notif-time {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.notif-content p {
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.view-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+
+.view-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    text-decoration: none;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-left: 1rem;
+    padding: 0.5rem;
+    line-height: 1;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-btn:hover {
+    color: var(--status-high, #ef4444);
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.empty-icon-wrapper {
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+}

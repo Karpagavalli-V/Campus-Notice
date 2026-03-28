@@ -1,0 +1,78 @@
+:root {
+  /* Gamified Primary Colors */
+  --primary-color: #8b5cf6;
+  --primary-light: #a78bfa;
+  --primary-dark: #6d28d9;
+
+  /* Secondary / Accent Colors */
+  --secondary-color: #06b6d4;
+  --secondary-light: #67e8f9;
+  --accent-color: #f472b6;
+
+  /* Instagram Gradient */
+  --insta-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  --gaming-gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #f472b6 100%);
+
+  /* Neutral Colors (Light Mode Gamified) */
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: rgba(139, 92, 246, 0.2);
+
+  /* Status Colors */
+  --status-high: #f43f5e;
+  --status-medium: #f97316;
+  --status-low: #10b981;
+  --status-info: #0ea5e9;
+
+  /* Shadows - Gamified Glows */
+  --shadow-sm: 0 2px 4px rgba(139, 92, 246, 0.05);
+  --shadow-md: 0 4px 12px rgba(139, 92, 246, 0.1);
+  --shadow-lg: 0 10px 25px rgba(139, 92, 246, 0.15);
+  --neon-glow: 0 0 10px rgba(139, 92, 246, 0.4), 0 0 20px rgba(6, 182, 212, 0.4);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Font Families - GAMIFIED */
+  --font-game: 'Orbitron', sans-serif;
+  --font-ui: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-headings: var(--font-game);
+
+  /* Premium Additions */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(139, 92, 246, 0.2);
+}
+
+:root.dark-mode {
+  color-scheme: dark;
+
+  /* Gamified Dark Colors - Taken from AboutPage */
+  --primary-color: #a78bfa;
+  --primary-light: #c4b5fd;
+  --primary-dark: #8b5cf6;
+
+  --bg-color: #050510;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: rgba(139, 92, 246, 0.25);
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.7);
+  --neon-glow: 0 0 10px rgba(167, 139, 250, 0.6), 0 0 20px rgba(103, 232, 249, 0.6);
+
+  --glass-bg: rgba(5, 5, 16, 0.8);
+  --glass-border: rgba(139, 92, 246, 0.3);
+}

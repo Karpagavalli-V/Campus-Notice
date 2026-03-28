@@ -1,0 +1,70 @@
+.notice-stories-container {
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    background-color: var(--card-bg);
+}
+
+.notice-stories-container::-webkit-scrollbar {
+    display: none;
+}
+
+.stories-track {
+    display: flex;
+    gap: 1.25rem;
+    padding: 0 1rem;
+}
+
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    min-width: 72px;
+}
+
+.story-avatar-ring {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: var(--insta-gradient);
+}
+
+.story-item.emergency .story-avatar-ring {
+    background: linear-gradient(45deg, #ff0000, #ff7300);
+}
+
+.story-avatar {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    border-radius: 50%;
+    border: 2px solid var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.story-label {
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.story-item:hover .story-avatar {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
