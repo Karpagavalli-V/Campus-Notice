@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Plus, ClipboardList } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { createNotice, getNotices } from "../services/noticeService";
 import { useToast } from "../context/ToastContext";
 import Button from "../components/common/Button/Button";
@@ -26,6 +27,7 @@ function FacultyDashboard() {
   const [myNotices, setMyNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAutoCategorized, setIsAutoCategorized] = useState(false);
+
   useEffect(() => {
     fetchMyNotices();
   }, []);
@@ -139,15 +141,36 @@ function FacultyDashboard() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: { opacity: 1, scale: 1, y: 0 }
+  };
+
   return (
-    <div className="faculty-dashboard">
+    <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="faculty-dashboard"
+    >
       <header className="dashboard-header">
-        <h1 className="page-title">Faculty Dashboard</h1>
-        <p className="page-subtitle">Create and manage academic notices for your students.</p>
+        <motion.h1 layoutId="page-title" className="page-title">Faculty Dashboard</motion.h1>
+        <motion.p variants={itemVariants} className="page-subtitle">Create and manage academic notices for your students.</motion.p>
       </header>
 
       <div className="content-grid-two-cols">
-        <section className="create-notice-section">
+        <motion.section 
+            variants={itemVariants}
+            className="create-notice-section"
+        >
           <div className="section-header">
             <h3>Post New Notice</h3>
           </div>
@@ -178,14 +201,22 @@ function FacultyDashboard() {
                   onBlur={handlePredictiveCategory}
                   required
                 />
-                {notice.content && (
-                  <div className="markdown-preview-box">
-                    <small className="preview-label">Live Preview:</small>
-                    <div className="preview-container">
-                      <MarkdownContent content={notice.content} />
-                    </div>
-                  </div>
-                )}
+                <AnimatePresence>
+                    {notice.content && (
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="markdown-preview-box"
+                        style={{ overflow: 'hidden' }}
+                    >
+                        <small className="preview-label">Live Preview:</small>
+                        <div className="preview-container">
+                        <MarkdownContent content={notice.content} />
+                        </div>
+                    </motion.div>
+                    )}
+                </AnimatePresence>
               </div>
 
               <div className="form-row">
@@ -271,115 +302,163 @@ function FacultyDashboard() {
               </div>
 
               <div className="form-group poll-toggle-group">
-                <label className="checkbox-label">
+                <label className="checkbox-label" style={{ cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={showPoll}
                     onChange={(e) => setShowPoll(e.target.checked)}
                   />
-                  <span>Include a Poll</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Plus size={16} /> Include a Poll
+                  </span>
                 </label>
               </div>
 
-              {showPoll && (
-                <div className="poll-creation-box">
-                  <div className="form-group">
-                    <label>Poll Question</label>
-                    <input
-                      className="form-input"
-                      placeholder="e.g. Which date works best for the extra class?"
-                      value={pollQuestion}
-                      onChange={(e) => setPollQuestion(e.target.value)}
-                      required={showPoll}
-                    />
-                  </div>
-                  <div className="poll-options-list">
-                    <label>Poll Options</label>
-                    {pollOptions.map((opt, idx) => (
-                      <div key={idx} className="poll-option-input-row">
+              <AnimatePresence>
+                {showPoll && (
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                        exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                        className="poll-creation-box"
+                        style={{ overflow: 'hidden', paddingBottom: '1rem' }}
+                    >
+                    <div className="form-group">
+                        <label>Poll Question</label>
                         <input
-                          className="form-input"
-                          placeholder={`Option ${idx + 1}`}
-                          value={opt}
-                          onChange={(e) => handleOptionChange(idx, e.target.value)}
-                          required={showPoll && idx < 2}
+                        className="form-input"
+                        placeholder="e.g. Which date works best for the extra class?"
+                        value={pollQuestion}
+                        onChange={(e) => setPollQuestion(e.target.value)}
+                        required={showPoll}
                         />
-                        {pollOptions.length > 2 && (
-                          <button
+                    </div>
+                    <div className="poll-options-list">
+                        <label>Poll Options</label>
+                        {pollOptions.map((opt, idx) => (
+                        <motion.div 
+                            layout
+                            key={idx} 
+                            className="poll-option-input-row"
+                        >
+                            <input
+                            className="form-input"
+                            placeholder={`Option ${idx + 1}`}
+                            value={opt}
+                            onChange={(e) => handleOptionChange(idx, e.target.value)}
+                            required={showPoll && idx < 2}
+                            />
+                            {pollOptions.length > 2 && (
+                            <button
+                                type="button"
+                                className="remove-opt-btn"
+                                onClick={() => removeOption(idx)}
+                            >
+                                ×
+                            </button>
+                            )}
+                        </motion.div>
+                        ))}
+                        {pollOptions.length < 5 && (
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="button"
-                            className="remove-opt-btn"
-                            onClick={() => removeOption(idx)}
-                          >
-                            ×
-                          </button>
+                            className="add-opt-btn"
+                            onClick={addOption}
+                        >
+                            + Add Option
+                        </motion.button>
                         )}
-                      </div>
-                    ))}
-                    {pollOptions.length < 5 && (
-                      <button
-                        type="button"
-                        className="add-opt-btn"
-                        onClick={addOption}
-                      >
-                        + Add Option
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
+                    </div>
+                    </motion.div>
+                )}
+              </AnimatePresence>
 
-
-              <Button type="submit" className="w-full">
-                Publish Notice
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                  <Button type="submit" className="w-full">
+                    Publish Notice
+                  </Button>
+              </motion.div>
             </form>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="my-notices-section">
+        <motion.section 
+            variants={itemVariants}
+            className="my-notices-section"
+        >
           <div className="section-header">
             <h3>My Recent Posts</h3>
           </div>
-          {loading ? (
-            <div className="dashboard-loading"><div className="loader"></div></div>
-          ) : myNotices.length === 0 ? (
-            <div className="empty-state" style={{ padding: '2rem' }}>
-              <p>You haven't posted any notices yet.</p>
-            </div>
-          ) : (
-            <div className="notices-list-compact" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {myNotices.slice(0, 5).map((n) => (
-                <div
-                  key={n._id}
-                  onClick={() => navigate(`/notice/${n._id}`)}
-                  style={{
-                    backgroundColor: 'var(--card-bg)',
-                    padding: '1rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-color)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer'
-                  }}
+          <AnimatePresence mode="wait">
+            {loading ? (
+                <motion.div 
+                    key="loader"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="dashboard-loading"
+                ><div className="loader"></div></motion.div>
+            ) : myNotices.length === 0 ? (
+                <motion.div 
+                    key="empty"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="empty-state" 
+                    style={{ padding: '2rem' }}
                 >
-                  <div>
-                    <p style={{ fontWeight: '600', margin: 0 }}>{n.title}</p>
-                    <small style={{ color: 'var(--text-muted)' }}>{new Date(n.createdAt).toLocaleDateString()}</small>
-                  </div>
-                  <span style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: n.priority === 'high' ? 'var(--status-high)' : n.priority === 'medium' ? 'var(--status-medium)' : 'var(--status-low)'
-                  }}></span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                    <ClipboardList size={40} style={{ opacity: 0.5, marginBottom: '1rem' }} />
+                    <p>You haven't posted any notices yet.</p>
+                </motion.div>
+            ) : (
+                <motion.div 
+                    key="list"
+                    className="notices-list-compact" 
+                    style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                >
+                {myNotices.slice(0, 5).map((n, i) => (
+                    <motion.div
+                        key={n._id}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        whileHover={{ x: 10, backgroundColor: 'rgba(139, 92, 246, 0.05)', borderColor: 'var(--primary-color)' }}
+                        onClick={() => navigate(`/notice/${n._id}`)}
+                        style={{
+                            backgroundColor: 'var(--card-bg)',
+                            padding: '1.rem',
+                            borderRadius: 'var(--radius-md)',
+                            border: '1px solid var(--border-color)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            transition: 'border-color 0.2s'
+                        }}
+                    >
+                    <div>
+                        <p style={{ fontWeight: '600', margin: 0 }}>{n.title}</p>
+                        <small style={{ color: 'var(--text-muted)' }}>{new Date(n.createdAt).toLocaleDateString()}</small>
+                    </div>
+                    <span style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: n.priority === 'high' ? 'var(--status-high)' : n.priority === 'medium' ? 'var(--status-medium)' : 'var(--status-low)',
+                        boxShadow: `0 0 10px ${n.priority === 'high' ? 'var(--status-high)' : 'transparent'}`
+                    }}></span>
+                    </motion.div>
+                ))}
+                </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.section>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

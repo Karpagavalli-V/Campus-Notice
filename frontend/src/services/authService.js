@@ -21,6 +21,11 @@ export const getFollowing = async () => {
 };
 
 export const getConnections = async () => {
-    const response = await api.get('/auth/connections');
-    return response.data;
+  const response = await api.get('/auth/connections');
+  return response.data;
+};
+
+export const getPublicProfile = async (id) => {
+  const response = await api.get(`/auth/user/${id}`);
+  return response.data;
 };

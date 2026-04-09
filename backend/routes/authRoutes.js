@@ -17,8 +17,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/register", authController.register);
-router.post("/login", authController.login);
+const { signupValidation, loginValidation } = require("../middleware/validator");
+
+router.post("/register", signupValidation, authController.register);
+router.post("/login", loginValidation, authController.login);
 router.put("/update-profile", protect, upload.single("profilePic"), authController.updateProfile);
 router.put("/change-password", protect, authController.changePassword);
 router.post("/forgot-password", authController.forgotPassword);
@@ -26,5 +28,9 @@ router.post("/reset-password/:token", authController.resetPassword);
 router.post("/follow/:id", protect, authController.toggleFollow);
 router.get("/following", protect, authController.getFollowing);
 router.get("/connections", protect, authController.getConnections);
+router.get("/user/:id", protect, authController.getPublicProfile);
+router.get("/all", protect, authController.getAllUsers);
+router.put("/status", protect, authController.updateStatus);
+router.get("/status/:id", protect, authController.getUserStatus);
 
 module.exports = router;

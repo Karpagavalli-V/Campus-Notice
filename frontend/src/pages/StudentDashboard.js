@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bookmark, Newspaper } from "lucide-react";
+import { Bookmark, Newspaper, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getNotices, getSavedNotices, toggleSaveNotice } from "../services/noticeService";
 import { useToast } from "../context/ToastContext";
 import NoticeCard from "../components/common/NoticeCard/NoticeCard";
@@ -43,10 +44,10 @@ function StudentDashboard() {
   };
 
   const [followingIds, setFollowingIds] = useState([]);
-  
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+
   const fetchFollowingIds = async () => {
     try {
-      // Direct call to API or via authService if exported
       const response = await fetch("http://localhost:5000/api/auth/following", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
@@ -56,6 +57,22 @@ function StudentDashboard() {
       console.error("Error fetching following:", err);
     }
   };
+  
+  const fetchSuggested = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/all", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      });
+      const data = await response.json();
+      const currentUserId = localStorage.getItem("userId");
+      const suggested = data.filter(u => u._id !== currentUserId && !followingIds.includes(u._id))
+                            .sort(() => 0.5 - Math.random()) // Shuffle
+                            .slice(0, 5); // Pick 5
+      setSuggestedUsers(suggested);
+    } catch (err) {
+      console.error("Error fetching suggested:", err);
+    }
+  }, [followingIds]);
 
   useEffect(() => {
     fetchSavedIds();
@@ -65,6 +82,24 @@ function StudentDashboard() {
   useEffect(() => {
     fetchNotices();
   }, [fetchNotices]);
+
+  useEffect(() => {
+    if (followingIds.length >= 0) fetchSuggested();
+  }, [followingIds, fetchSuggested]);
+
+  const handleFollow = async (id) => {
+      try {
+          const response = await fetch(`http://localhost:5000/api/auth/follow/${id}`, {
+              method: 'PUT',
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          });
+          const res = await response.json();
+          setFollowingIds(prev => [...prev, id]);
+          showToast(res.message, "success");
+      } catch (err) {
+          showToast("Failed to follow user", "error");
+      }
+  };
 
   const handleToggleSave = async (id) => {
     try {
@@ -80,7 +115,6 @@ function StudentDashboard() {
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    // If toggling 'showFollowing' or 'showSaved', make sure they are mutually exclusive or handle it gracefully
     if (name === 'showFollowing' && checked) {
         setFilters({ ...filters, showFollowing: true, showSaved: false });
     } else if (name === 'showSaved' && checked) {
@@ -95,10 +129,14 @@ function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="dashboard-loading">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="dashboard-loading"
+      >
         <div className="loader"></div>
         <p>Fetching latest notices...</p>
-      </div>
+      </motion.div>
     );
   }
 
@@ -115,63 +153,128 @@ function StudentDashboard() {
   ).slice(0, 10);
 
   return (
-    <div className="student-dashboard feed-layout">
-      {/* Stories Section */}
-      <NoticeStories
-        urgentNotices={storyNotices}
-        onStoryClick={(id) => navigate(`/notice/${id}`)}
-      />
+    <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="student-dashboard dashboard-grid-main"
+    >
+      <div className="feed-container-main">
+        {/* Stories Section */}
+        <NoticeStories
+          urgentNotices={storyNotices}
+          onStoryClick={(id) => navigate(`/notice/${id}`)}
+        />
 
-      <div className="feed-container">
-        
-        {/* Modern Tab Switcher: Unique Way */}
+        {/* Modern Tab Switcher */}
         <div className="tab-switcher-modern">
             <button 
                 onClick={() => handleFilterChange({ target: { name: 'showFollowing', type: 'checkbox', checked: false }})}
                 className={`tab-btn-modern ${(!filters.showFollowing && !filters.showSaved) ? 'active' : ''}`}
             >
-                For You
+                {(!filters.showFollowing && !filters.showSaved) && (
+                    <motion.div layoutId="activeTab" className="active-indicator" />
+                )}
+                <span style={{ position: 'relative', zIndex: 1 }}>For You</span>
             </button>
             <button 
                 onClick={() => handleFilterChange({ target: { name: 'showFollowing', type: 'checkbox', checked: true }})}
                 className={`tab-btn-modern ${filters.showFollowing ? 'active' : ''}`}
             >
-                Following
+                 {filters.showFollowing && (
+                    <motion.div layoutId="activeTab" className="active-indicator" />
+                )}
+                <span style={{ position: 'relative', zIndex: 1 }}>Following</span>
             </button>
             <button 
                 onClick={() => handleFilterChange({ target: { name: 'showSaved', type: 'checkbox', checked: true }})}
                 className={`tab-btn-modern ${filters.showSaved ? 'active' : ''}`}
             >
-                Saved
+                 {filters.showSaved && (
+                    <motion.div layoutId="activeTab" className="active-indicator" />
+                )}
+                <span style={{ position: 'relative', zIndex: 1 }}>Saved</span>
             </button>
         </div>
 
-        {displayedNotices.length === 0 ? (
-          <div className="empty-state">
-            <span className="empty-icon">
-              {filters.showSaved ? <Bookmark size={48} /> : <Newspaper size={48} />}
-            </span>
-            <h3>{filters.showSaved ? 'No Saved Notices' : filters.showFollowing ? 'No Following Updates' : 'No New Notices'}</h3>
-            <p>{filters.showSaved ? "You haven't bookmarked any notices yet." : filters.showFollowing ? "Follow faculty to see updates here." : "You're all caught up!"}</p>
-          </div>
-        ) : (
-          <div className="notices-feed">
-            {displayedNotices.map((notice) => (
-              <NoticeCard
-                key={notice._id}
-                notice={notice}
-                isSaved={savedIds.includes(notice._id)}
-                onToggleSave={handleToggleSave}
-                onClick={() => navigate(`/notice/${notice._id}`)}
-              />
-            ))}
-            <div className="feed-footer">
-              <p>You're all caught up! ✓</p>
-            </div>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+            {displayedNotices.length === 0 ? (
+            <motion.div 
+                key="empty"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="empty-state"
+            >
+                <motion.span 
+                    className="empty-icon"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 4 }}
+                >
+                {filters.showSaved ? <Bookmark size={48} /> : <Newspaper size={48} />}
+                </motion.span>
+                <h3>{filters.showSaved ? 'No Saved Notices' : filters.showFollowing ? 'No Following Updates' : 'No New Notices'}</h3>
+                <p>{filters.showSaved ? "You haven't bookmarked any notices yet." : filters.showFollowing ? "Follow faculty to see updates here." : "You're all caught up!"}</p>
+            </motion.div>
+            ) : (
+            <motion.div 
+                key="feed"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="notices-feed"
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {displayedNotices.map((notice, index) => (
+                    <NoticeCard
+                        key={notice._id}
+                        notice={notice}
+                        isSaved={savedIds.includes(notice._id)}
+                        onToggleSave={handleToggleSave}
+                        onClick={() => navigate(`/notice/${notice._id}`)}
+                    />
+                    ))}
+                </div>
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    className="feed-footer"
+                >
+                <p><Sparkles size={16} /> You're all caught up! ✓</p>
+                </motion.div>
+            </motion.div>
+            )}
+        </AnimatePresence>
       </div>
-    </div>
+
+      {/* Suggested Users Sidebar */}
+      <aside className="suggestions-sidebar-fixed">
+          <div className="suggestions-header">
+              <h3>Suggested for you</h3>
+              <button onClick={() => navigate('/search')}>See All</button>
+          </div>
+          <div className="suggestions-list">
+              {suggestedUsers.map(user => (
+                  <div key={user._id} className="suggestion-user-item">
+                      <div className="s-user-info" onClick={() => navigate(`/user/${user._id}`)}>
+                          <div className="s-avatar">
+                              {user.profilePic ? <img src={`http://localhost:5000${user.profilePic}`} alt="" /> : user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="s-details">
+                              <span className="s-name">{user.name}</span>
+                              <span className="s-role">{user.role}</span>
+                          </div>
+                      </div>
+                      <button className="s-follow-btn" onClick={() => handleFollow(user._id)}>Follow</button>
+                  </div>
+              ))}
+              {suggestedUsers.length === 0 && <p className="s-empty">Finding people to follow...</p>}
+          </div>
+          <footer className="sidebar-copy-footer">
+              <p>© 2024 CAMPUS NOTICE FROM DEEPMIND</p>
+          </footer>
+      </aside>
+    </motion.div>
+
   );
 }
 

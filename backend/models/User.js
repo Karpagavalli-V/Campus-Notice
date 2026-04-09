@@ -75,6 +75,44 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Gamification
+    xp: {
+      type: Number,
+      default: 0,
+    },
+    badges: [
+      {
+        name: String,
+        icon: String,
+        earnedAt: { type: Date, default: Date.now },
+      },
+    ],
+    // Profile Enhancements
+    bio: {
+      type: String,
+      default: "",
+    },
+    officeHours: {
+      type: String,
+      default: "", // e.g. "Mon-Fri, 10:00 AM - 12:00 PM"
+    },
+    specialization: {
+      type: String,
+      default: "", // For Faculty
+    },
+    socialLinks: {
+      linkedin: { type: String, default: "" },
+      twitter: { type: String, default: "" },
+      github: { type: String, default: "" },
+    },
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
+    status: {
+      type: String,
+      default: "Hey there! I am using Campus Notice.",
+    },
   },
   { timestamps: true }
 );

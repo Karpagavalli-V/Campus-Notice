@@ -21,6 +21,24 @@ exports.init = (server) => {
             }
         });
 
+        // Real-time Calling Signaling
+        socket.on("callUser", (data) => {
+            console.log(`Calling user ${data.to} from ${data.from}`);
+            socket.to(data.to).emit("incomingCall", { 
+                from: data.from, 
+                type: data.type, 
+                user: data.user 
+            });
+        });
+
+        socket.on("answerCall", (data) => {
+            socket.to(data.to).emit("callResponse", { accepted: data.accepted });
+        });
+
+        socket.on("endCall", (data) => {
+            socket.to(data.to).emit("callEnded");
+        });
+
         socket.on("disconnect", () => {
             console.log("Client disconnected");
         });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, Users, FileText } from "lucide-react";
+import { TrendingUp, Users, FileText, Activity, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getAdminStats, createNewUser } from "../services/adminService";
 import { useToast } from "../context/ToastContext";
 import Button from "../components/common/Button/Button";
@@ -54,47 +55,109 @@ function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="dashboard-loading">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="dashboard-loading"
+      >
         <div className="loader"></div>
         <p>Loading overview...</p>
-      </div>
+      </motion.div>
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: { opacity: 1, scale: 1, y: 0 }
+  };
+
   return (
-    <div className="admin-dashboard">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="admin-dashboard"
+    >
       <header className="dashboard-header">
-        <h1 className="page-title">Admin Overview</h1>
-        <p className="page-subtitle">Manage campus users and system performance.</p>
+        <motion.h1 layoutId="page-title" className="page-title">Admin Overview</motion.h1>
+        <motion.p variants={cardVariants} className="page-subtitle">Manage campus users and system performance.</motion.p>
       </header>
 
-      <section className="stats-grid">
-        <div className="stat-card">
+      <motion.section 
+        className="stats-grid"
+        variants={containerVariants}
+      >
+        <motion.div 
+          className="stat-card"
+          variants={cardVariants}
+          whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(139, 92, 246, 0.1)" }}
+        >
+          <div className="stat-icon-wrapper" style={{ color: 'var(--primary-color)', marginBottom: '0.5rem' }}>
+            <Users size={24} />
+          </div>
           <span className="stat-label">Total Users</span>
           <span className="stat-value">{stats.totalUsers}</span>
-        </div>
-        <div className="stat-card">
+        </motion.div>
+        
+        <motion.div 
+          className="stat-card"
+          variants={cardVariants}
+          whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(6, 182, 212, 0.1)" }}
+        >
+          <div className="stat-icon-wrapper" style={{ color: 'var(--secondary-color)', marginBottom: '0.5rem' }}>
+            <FileText size={24} />
+          </div>
           <span className="stat-label">Total Notices</span>
           <span className="stat-value">{stats.totalNotices}</span>
-        </div>
-        <div className="stat-card">
+        </motion.div>
+
+        <motion.div 
+          className="stat-card"
+          variants={cardVariants}
+          whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(244, 114, 182, 0.1)" }}
+        >
+          <div className="stat-icon-wrapper" style={{ color: 'var(--accent-color)', marginBottom: '0.5rem' }}>
+              <Activity size={24} />
+          </div>
           <span className="stat-label">Active Groups</span>
           <span className="stat-value">4</span>
-        </div>
-        <div className="stat-card">
+        </motion.div>
+
+        <motion.div 
+          className="stat-card"
+          variants={cardVariants}
+          whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(16, 185, 129, 0.1)" }}
+        >
+          <div className="stat-icon-wrapper" style={{ color: 'var(--status-low)', marginBottom: '0.5rem' }}>
+              <ShieldCheck size={24} />
+          </div>
           <span className="stat-label">System Health</span>
           <span className="stat-value">100%</span>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
-      <div style={{ marginBottom: '2rem', textAlign: 'right' }}>
+      <motion.div 
+        variants={cardVariants}
+        style={{ marginBottom: '2rem', textAlign: 'right' }}
+      >
         <Button variant="outline" onClick={() => (window.location.href = "/admin/analytics")} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
           View Detailed Analytics <TrendingUp size={16} />
         </Button>
-      </div>
+      </motion.div>
 
       <div className="content-grid-two-cols">
-        <section className="admin-action-section">
+        <motion.section 
+          variants={cardVariants}
+          className="admin-action-section"
+        >
           <div className="section-header">
             <h3>Quick Actions</h3>
           </div>
@@ -157,14 +220,20 @@ function AdminDashboard() {
               </Button>
             </form>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="system-logs-section">
+        <motion.section 
+          variants={cardVariants}
+          className="system-logs-section"
+        >
           <div className="section-header">
             <h3>Recent Activity</h3>
           </div>
           <div className="activity-list">
-            <div className="activity-item">
+            <motion.div 
+              whileHover={{ x: 10, backgroundColor: "rgba(139, 92, 246, 0.05)" }}
+              className="activity-item"
+            >
               <span className="activity-icon">
                 <Users size={18} />
               </span>
@@ -172,8 +241,11 @@ function AdminDashboard() {
                 <p>New faculty member registered</p>
                 <small>2 minutes ago</small>
               </div>
-            </div>
-            <div className="activity-item">
+            </motion.div>
+            <motion.div 
+              whileHover={{ x: 10, backgroundColor: "rgba(139, 92, 246, 0.05)" }}
+              className="activity-item"
+            >
               <span className="activity-icon">
                 <FileText size={18} />
               </span>
@@ -181,11 +253,11 @@ function AdminDashboard() {
                 <p>Physics Dept. posted a new notice</p>
                 <small>1 hour ago</small>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
       </div>
-    </div>
+    </motion.div>
   );
 }
 export default AdminDashboard;

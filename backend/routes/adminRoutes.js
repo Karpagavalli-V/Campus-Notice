@@ -6,7 +6,9 @@ const {
   getAdminStats,
   getAllUsers,
   deleteUser,
-  getAnalytics
+  getAnalytics,
+  bulkCreateUsers,
+  toggleAccountLock
 } = require("../controllers/adminController");
 
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
@@ -48,6 +50,25 @@ router.get(
   protect,
   authorizeRoles("admin"),
   getAnalytics
+);
+
+// ✅ NEW BULK & LOCK
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+
+router.post(
+  "/bulk-register",
+  protect,
+  authorizeRoles("admin"),
+  upload.single("file"),
+  bulkCreateUsers
+);
+
+router.put(
+  "/users/:id/lock",
+  protect,
+  authorizeRoles("admin"),
+  toggleAccountLock
 );
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const express = require("express");
 const noticeController = require("../controllers/noticeController");
+const { noticeValidation } = require("../middleware/validator");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.post(
   protect,
   authorizeRoles("admin", "faculty"),
   upload.array("attachments", 10),
+  noticeValidation,
   noticeController.createNotice
 );
 
@@ -35,6 +37,7 @@ router.put(
   protect,
   authorizeRoles("admin", "faculty"),
   upload.array("attachments", 10),
+  noticeValidation,
   noticeController.updateNotice
 );
 

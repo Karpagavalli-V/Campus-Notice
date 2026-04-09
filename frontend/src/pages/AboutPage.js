@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import "./AboutPage.css";
 
 const STATS = [
@@ -111,12 +112,37 @@ const UPDATES = [
   },
 ];
 
+const Counter = ({ value, duration = 2 }) => {
+    const [count, setCount] = useState(0);
+    const target = parseFloat(value.toString().replace(/[^0-9.]/g, ''));
+    const suffix = value.toString().replace(/[0-9.]/g, '');
+
+    useEffect(() => {
+        let startTime = null;
+        let animationFrame = null;
+
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = (timestamp - startTime) / (duration * 1000);
+            
+            if (progress < 1) {
+                setCount(Math.min(target, Math.floor(progress * target)));
+                animationFrame = requestAnimationFrame(animate);
+            } else {
+                setCount(target);
+            }
+        };
+
+        animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
+    }, [target, duration]);
+
+    return <span>{count.toLocaleString()}{suffix}</span>;
+};
+
 export default function AboutPage() {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("about");
-  const [animatedStats, setAnimatedStats] = useState([0, 0, 0, 0]);
-  const [statsVisible, setStatsVisible] = useState(false);
-  const statsRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -126,41 +152,22 @@ export default function AboutPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !statsVisible) {
-          setStatsVisible(true);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    if (statsRef.current) observer.observe(statsRef.current);
-    return () => observer.disconnect();
-  }, [statsVisible]);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2 }
+    }
+  };
 
-  useEffect(() => {
-    if (!statsVisible) return;
-    const targets = [5000, 200, 10000, 99.9];
-    const duration = 2000;
-    const steps = 60;
-    let step = 0;
-    const interval = setInterval(() => {
-      step++;
-      const progress = step / steps;
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setAnimatedStats(targets.map((t) => Math.round(t * eased)));
-      if (step >= steps) clearInterval(interval);
-    }, duration / steps);
-    return () => clearInterval(interval);
-  }, [statsVisible]);
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
+  };
 
-  const formatStat = (idx, val) => {
-    if (idx === 0) return val.toLocaleString() + "+";
-    if (idx === 1) return val + "+";
-    if (idx === 2) return (val / 1000).toFixed(val >= 1000 ? 0 : 1) + "K+";
-    if (idx === 3) return val.toFixed(1) + "%";
-    return val;
+  const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
   };
 
   return (
@@ -168,40 +175,49 @@ export default function AboutPage() {
       {/* NAV BAR */}
       <nav className={`about-nav ${scrolled ? "about-nav--scrolled" : ""}`}>
         <div className="about-nav__inner">
-          <div className="about-nav__logo">
+          <motion.div 
+            className="about-nav__logo"
+            whileHover={{ scale: 1.05 }}
+          >
             <span className="about-nav__logo-icon">📢</span>
             <span className="about-nav__logo-text">Campus<span>Notice</span></span>
-          </div>
+          </motion.div>
+          
           <ul className={`about-nav__links ${menuOpen ? "about-nav__links--open" : ""}`}>
-            <li>
-              <button
-                className={activeSection === "about" ? "active" : ""}
-                onClick={() => { setActiveSection("about"); setMenuOpen(false); document.getElementById("about-sec").scrollIntoView({ behavior: "smooth" }); }}
-              >About</button>
-            </li>
-            <li>
-              <button
-                className={activeSection === "features" ? "active" : ""}
-                onClick={() => { setActiveSection("features"); setMenuOpen(false); document.getElementById("features-sec").scrollIntoView({ behavior: "smooth" }); }}
-              >Features</button>
-            </li>
-            <li>
-              <button
-                className={activeSection === "updates" ? "active" : ""}
-                onClick={() => { setActiveSection("updates"); setMenuOpen(false); document.getElementById("updates-sec").scrollIntoView({ behavior: "smooth" }); }}
-              >Updates</button>
-            </li>
-            <li>
-              <button
-                className={activeSection === "team" ? "active" : ""}
-                onClick={() => { setActiveSection("team"); setMenuOpen(false); document.getElementById("team-sec").scrollIntoView({ behavior: "smooth" }); }}
-              >Team</button>
-            </li>
+            {["about", "features", "updates", "team"].map((sec) => (
+              <li key={sec}>
+                <button
+                  className={activeSection === sec ? "active" : ""}
+                  onClick={() => { 
+                    setActiveSection(sec); 
+                    setMenuOpen(false); 
+                    document.getElementById(`${sec}-sec`).scrollIntoView({ behavior: "smooth" }); 
+                  }}
+                >
+                  {sec.charAt(0).toUpperCase() + sec.slice(1)}
+                  {activeSection === sec && (
+                    <motion.div layoutId="nav-underline" className="nav-underline" />
+                  )}
+                </button>
+              </li>
+            ))}
           </ul>
+
           <div className="about-nav__actions">
-            <button className="about-nav__login" onClick={() => navigate("/login")}>Log In</button>
-            <button className="about-nav__signup" onClick={() => navigate("/signup")}>Sign Up</button>
+            <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="about-nav__login" 
+                onClick={() => navigate("/login")}
+            >Log In</motion.button>
+            <motion.button 
+                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(124, 58, 237, 0.4)" }}
+                whileTap={{ scale: 0.95 }}
+                className="about-nav__signup" 
+                onClick={() => navigate("/signup")}
+            >Sign Up</motion.button>
           </div>
+
           <button className="about-nav__hamburger" onClick={() => setMenuOpen((x) => !x)} aria-label="Menu">
             <span></span><span></span><span></span>
           </button>
@@ -211,99 +227,266 @@ export default function AboutPage() {
       {/* HERO */}
       <section className="about-hero" id="about-sec">
         <div className="about-hero__bg">
-          <div className="about-hero__orb about-hero__orb--1"></div>
-          <div className="about-hero__orb about-hero__orb--2"></div>
-          <div className="about-hero__orb about-hero__orb--3"></div>
+          <motion.div 
+            animate={{ 
+                scale: [1, 1.2, 1],
+                rotate: [0, 90, 0],
+                x: [0, 50, 0]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="about-hero__orb about-hero__orb--1"
+          ></motion.div>
+          <motion.div 
+            animate={{ 
+                scale: [1, 1.3, 1],
+                rotate: [0, -90, 0],
+                x: [0, -70, 0]
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="about-hero__orb about-hero__orb--2"
+          ></motion.div>
           <div className="about-hero__grid"></div>
         </div>
-        <div className="about-hero__content">
-          <div className="about-hero__badge">
-            <span className="about-hero__badge-dot"></span>
+
+        <motion.div 
+          className="about-hero__content"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants} className="about-hero__badge">
+            <motion.span 
+                animate={{ opacity: [1, 0.5, 1] }} 
+                transition={{ duration: 2, repeat: Infinity }}
+                className="about-hero__badge-dot"
+            ></motion.span>
             LEVEL UP YOUR CAMPUS LIFE
-          </div>
-          <h1 className="about-hero__title">
-            Your Campus.<br />
-            <span className="about-hero__title-gradient">Amplified.</span>
-          </h1>
-          <p className="about-hero__sub">
+          </motion.div>
+          
+          <motion.h1 
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.05,
+                  delayChildren: 0.5
+                }
+              }
+            }}
+            className="about-hero__title"
+          >
+            {"Your Campus.".split("").map((char, index) => (
+              <motion.span
+                key={index}
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                style={{ display: "inline-block" }}
+              >
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            ))}
+            <br />
+            <span className="about-hero__title-gradient">
+              {"Amplified.".split("").map((char, index) => (
+                <motion.span
+                  key={index}
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                  style={{ display: "inline-block" }}
+                >
+                  {char === " " ? "\u00A0" : char}
+                </motion.span>
+              ))}
+              <motion.span
+                variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1 }
+                }}
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ 
+                    opacity: { duration: 0.8, repeat: Infinity, ease: "linear" },
+                    default: { delay: 1.5 }
+                }}
+                className="about-hero__cursor"
+              />
+            </span>
+          </motion.h1>
+
+          <motion.p 
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { 
+                opacity: 1, 
+                y: 0,
+                transition: { delay: 1.8, duration: 0.8 } 
+              }
+            }} 
+            className="about-hero__sub"
+          >
             Campus Notice is the ultimate digital notice board for modern colleges —
             built for students, powered by faculty, and designed to keep every corner
             of your campus connected.
-          </p>
-          <div className="about-hero__cta">
-            <button className="about-hero__btn-primary" onClick={() => navigate("/signup")}>
+          </motion.p>
+
+          <motion.div 
+            variants={{
+                hidden: { opacity: 0 },
+                visible: { 
+                    opacity: 1,
+                    transition: { delay: 2.2, staggerChildren: 0.1 }
+                }
+            }}
+            className="about-hero__cta"
+          >
+            <motion.button 
+                whileHover={{ scale: 1.05, x: 5 }}
+                whileTap={{ scale: 0.95 }}
+                className="about-hero__btn-primary" 
+                onClick={() => navigate("/signup")}
+            >
               <span>JOIN THE CAMPUS</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button className="about-hero__btn-secondary" onClick={() => navigate("/login")}>
+            </motion.button>
+            <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="about-hero__btn-secondary" 
+                onClick={() => navigate("/login")}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg>
               <span>SIGN IN</span>
-            </button>
-          </div>
-          <div className="about-hero__pills">
-            <span className="about-hero__pill">⚡ Real-Time Alerts</span>
-            <span className="about-hero__pill">🎓 Student Portal</span>
-            <span className="about-hero__pill">🛡️ Role-Based Access</span>
-          </div>
-        </div>
-        <div className="about-hero__visual">
-          <div className="about-hero__card about-hero__card--main">
+            </motion.button>
+          </motion.div>
+
+          <motion.div 
+            variants={{
+                hidden: { opacity: 0 },
+                visible: { 
+                    opacity: 1,
+                    transition: { delay: 2.5, staggerChildren: 0.1 }
+                }
+            }}
+            className="about-hero__pills"
+          >
+            {["⚡ Real-Time Alerts", "🎓 Student Portal", "🛡️ Role-Based Access"].map(pill => (
+                <motion.span 
+                    key={pill}
+                    whileHover={{ y: -5, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
+                    className="about-hero__pill"
+                >{pill}</motion.span>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        <motion.div 
+            className="about-hero__visual"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <motion.div 
+            className="about-hero__card about-hero__card--main"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          >
             <div className="about-hero__card-header">
               <div className="about-hero__card-dot" style={{background:"#ff5f57"}}></div>
               <div className="about-hero__card-dot" style={{background:"#febc2e"}}></div>
               <div className="about-hero__card-dot" style={{background:"#28c840"}}></div>
               <span className="about-hero__card-title">NOTICE FEED</span>
             </div>
-            <div className="about-hero__notice">
-              <span className="about-hero__notice-tag" style={{background:"rgba(124,58,237,0.2)",color:"#a78bfa"}}>📢 URGENT</span>
-              <p className="about-hero__notice-title">Internal Assessment Schedule Released</p>
-              <p className="about-hero__notice-meta">CSE Dept • 2 min ago</p>
-            </div>
-            <div className="about-hero__notice">
-              <span className="about-hero__notice-tag" style={{background:"rgba(8,145,178,0.2)",color:"#67e8f9"}}>🎉 EVENT</span>
-              <p className="about-hero__notice-title">Tech Symposium 2026 — Register Now!</p>
-              <p className="about-hero__notice-meta">IT Dept • 15 min ago</p>
-            </div>
-            <div className="about-hero__notice">
-              <span className="about-hero__notice-tag" style={{background:"rgba(190,24,93,0.2)",color:"#f9a8d4"}}>🏆 SPORTS</span>
-              <p className="about-hero__notice-title">Inter-College Cricket League Selections</p>
-              <p className="about-hero__notice-meta">Sports Club • 1 hr ago</p>
-            </div>
-          </div>
-          <div className="about-hero__card about-hero__card--float-1">
+            {[
+                { tag: "📢 URGENT", title: "Internal Assessment Schedule Released", meta: "CSE Dept • 2 min ago", color: "#a78bfa", bg: "rgba(124,58,237,0.2)" },
+                { tag: "🎉 EVENT", title: "Tech Symposium 2026 — Register Now!", meta: "IT Dept • 15 min ago", color: "#67e8f9", bg: "rgba(8,145,178,0.2)" },
+                { tag: "🏆 SPORTS", title: "Inter-College Cricket League Selections", meta: "Sports Club • 1 hr ago", color: "#f9a8d4", bg: "rgba(190,24,93,0.2)" }
+            ].map((n, i) => (
+                <motion.div 
+                    key={i}
+                    whileHover={{ x: 5, backgroundColor: "rgba(255,255,255,0.05)" }}
+                    className="about-hero__notice"
+                >
+                    <span className="about-hero__notice-tag" style={{background: n.bg, color: n.color}}>{n.tag}</span>
+                    <p className="about-hero__notice-title">{n.title}</p>
+                    <p className="about-hero__notice-meta">{n.meta}</p>
+                </motion.div>
+            ))}
+          </motion.div>
+          
+          <motion.div 
+            className="about-hero__card about-hero__card--float-1"
+            animate={{ y: [0, 15, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
             <span>🔔</span>
             <p>3 new notices</p>
-          </div>
-          <div className="about-hero__card about-hero__card--float-2">
+          </motion.div>
+          
+          <motion.div 
+            className="about-hero__card about-hero__card--float-2"
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+          >
             <span>⚡</span>
             <p>Live</p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* STATS BAR */}
-      <section className="about-stats" ref={statsRef}>
+      <section className="about-stats">
         <div className="about-stats__inner">
           {STATS.map((s, i) => (
-            <div className="about-stats__item" key={i}>
+            <motion.div 
+                className="about-stats__item" 
+                key={i}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+            >
               <div className="about-stats__icon">{s.icon}</div>
-              <div className="about-stats__value">{formatStat(i, animatedStats[i])}</div>
+              <div className="about-stats__value">
+                <Counter value={s.value} />
+              </div>
               <div className="about-stats__label">{s.label}</div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
       {/* FEATURES SECTION */}
       <section className="about-features" id="features-sec">
-        <div className="about-section-header">
+        <motion.div 
+            className="about-section-header"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeUp}
+        >
           <span className="about-section-tag">#FEATURES</span>
           <h2 className="about-section-title">Built Different.<br /><span>Plays Different.</span></h2>
           <p className="about-section-sub">Every feature is crafted to make campus communication faster, smarter, and more engaging.</p>
-        </div>
-        <div className="about-features__grid">
+        </motion.div>
+
+        <motion.div 
+            className="about-features__grid"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+        >
           {FEATURES.map((f, i) => (
-            <div className="about-feature-card" key={i}>
+            <motion.div 
+                className="about-feature-card" 
+                key={i}
+                variants={itemVariants}
+                whileHover={{ y: -10 }}
+            >
               <div className="about-feature-card__inner">
                 <div className="about-feature-card__top">
                   <span className="about-feature-card__tag" style={{ background: f.tagColor + "22", color: f.tagColor }}>{f.tag}</span>
@@ -316,15 +499,21 @@ export default function AboutPage() {
                   <div className="about-feature-card__glow" style={{ background: f.tagColor }}></div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* MISSION SECTION */}
       <section className="about-mission">
         <div className="about-mission__inner">
-          <div className="about-mission__text">
+          <motion.div 
+            className="about-mission__text"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
             <span className="about-section-tag">#OUR MISSION</span>
             <h2 className="about-section-title">Why We Built<br /><span>Campus Notice</span></h2>
             <p className="about-mission__para">
@@ -338,22 +527,36 @@ export default function AboutPage() {
               level of urgency.
             </p>
             <div className="about-mission__values">
-              <div className="about-mission__value">
-                <span>🎯</span> <p><strong>Precision</strong> — Right notice, right person, right time.</p>
-              </div>
-              <div className="about-mission__value">
-                <span>🌐</span> <p><strong>Inclusivity</strong> — Every department, every student, one feed.</p>
-              </div>
-              <div className="about-mission__value">
-                <span>🔒</span> <p><strong>Security</strong> — Role-based control with zero noisy spam.</p>
-              </div>
+              {[
+                { icon: "🎯", title: "Precision", text: "Right notice, right person, right time." },
+                { icon: "🌐", title: "Inclusivity", text: "Every department, every student, one feed." },
+                { icon: "🔒", title: "Security", text: "Role-based control with zero noisy spam." }
+              ].map((v, i) => (
+                <motion.div 
+                    key={i}
+                    whileHover={{ x: 10 }}
+                    className="about-mission__value"
+                >
+                    <span>{v.icon}</span> <p><strong>{v.title}</strong> — {v.text}</p>
+                </motion.div>
+              ))}
             </div>
-          </div>
-          <div className="about-mission__visual">
+          </motion.div>
+
+          <motion.div 
+            className="about-mission__visual"
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
             <div className="about-mission__card-stack">
               <div className="about-mission__stack-card about-mission__stack-card--back"></div>
               <div className="about-mission__stack-card about-mission__stack-card--mid"></div>
-              <div className="about-mission__stack-card about-mission__stack-card--front">
+              <motion.div 
+                className="about-mission__stack-card about-mission__stack-card--front"
+                whileHover={{ scale: 1.02, rotate: -1 }}
+              >
                 <div className="about-mission__quote">
                   <div className="about-mission__quote-mark">"</div>
                   <p>Campus Notice turned our chaos into clarity. Every student now knows what's happening, when it's happening.</p>
@@ -365,22 +568,36 @@ export default function AboutPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* UPDATES SECTION */}
       <section className="about-updates" id="updates-sec">
-        <div className="about-section-header">
+        <motion.div 
+            className="about-section-header"
+            initial="hidden"
+            whileInView="visible"
+            variants={fadeUp}
+        >
           <span className="about-section-tag">#UPDATES</span>
           <h2 className="about-section-title">What's New.<br /><span>What's Next.</span></h2>
           <p className="about-section-sub">We're always shipping. Here's the latest from the Campus Notice dev team.</p>
-        </div>
+        </motion.div>
+
         <div className="about-updates__grid">
           {UPDATES.map((u, i) => (
-            <div className="about-update-card" key={i}>
+            <motion.div 
+                className="about-update-card" 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ x: 10, backgroundColor: "rgba(255,255,255,0.05)" }}
+            >
               <div className="about-update-card__icon">{u.icon}</div>
               <div className="about-update-card__body">
                 <div className="about-update-card__meta">
@@ -390,31 +607,52 @@ export default function AboutPage() {
                 <h3 className="about-update-card__title">{u.title}</h3>
                 <p className="about-update-card__desc">{u.desc}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
       {/* TEAM SECTION */}
       <section className="about-team" id="team-sec">
-        <div className="about-section-header">
+        <motion.div 
+            className="about-section-header"
+            initial="hidden"
+            whileInView="visible"
+            variants={fadeUp}
+        >
           <span className="about-section-tag">#TEAM</span>
           <h2 className="about-section-title">The Squad<br /><span>Behind the Screen.</span></h2>
           <p className="about-section-sub">Built with passion, powered by curiosity — meet the people making Campus Notice possible.</p>
-        </div>
-        <div className="about-team__grid">
+        </motion.div>
+
+        <motion.div 
+            className="about-team__grid"
+            initial="hidden"
+            whileInView="visible"
+            variants={containerVariants}
+        >
           {TEAM.map((t, i) => (
-            <div className="about-team-card" key={i}>
+            <motion.div 
+                className="about-team-card" 
+                key={i}
+                variants={itemVariants}
+                whileHover={{ y: -10 }}
+            >
               <div className="about-team-card__avatar" style={{ background: t.color }}>
                 {t.avatar}
-                <div className="about-team-card__avatar-ring" style={{ borderColor: t.color }}></div>
+                <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    className="about-team-card__avatar-ring" 
+                    style={{ borderColor: t.color }}
+                ></motion.div>
               </div>
               <h3 className="about-team-card__name">{t.name}</h3>
               <span className="about-team-card__role" style={{ color: t.color }}>{t.role}</span>
               <p className="about-team-card__tagline">"{t.tagline}"</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* CTA SECTION */}
@@ -423,21 +661,36 @@ export default function AboutPage() {
           <div className="about-cta__orb about-cta__orb--1"></div>
           <div className="about-cta__orb about-cta__orb--2"></div>
         </div>
-        <div className="about-cta__inner">
+        <motion.div 
+            className="about-cta__inner"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+        >
           <div className="about-cta__badge">🎮 READY PLAYER ONE?</div>
           <h2 className="about-cta__title">Join Your Campus.<br /><span>Stay Ahead.</span></h2>
           <p className="about-cta__sub">Be part of a smarter, faster, more connected campus experience. Sign up today — it's free.</p>
           <div className="about-cta__actions">
-            <button className="about-hero__btn-primary" onClick={() => navigate("/signup")}>
+            <motion.button 
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                className="about-hero__btn-primary" 
+                onClick={() => navigate("/signup")}
+            >
               <span>CREATE ACCOUNT</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button className="about-hero__btn-secondary" onClick={() => navigate("/login")}>
+            </motion.button>
+            <motion.button 
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                className="about-hero__btn-secondary" 
+                onClick={() => navigate("/login")}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg>
               <span>LOGIN</span>
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* FOOTER */}

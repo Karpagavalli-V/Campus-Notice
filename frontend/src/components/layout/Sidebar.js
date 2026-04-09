@@ -15,7 +15,8 @@ import {
     BarChart2,
     Sun,
     Moon,
-    Users
+    Users,
+    Trophy
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -34,6 +35,7 @@ const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
         { path: '/groups', label: 'Groups', icon: <Users size={28} /> },
         { path: '/notifications', label: 'Notifications', icon: <Bell size={28} /> },
         { path: '/calendar', label: 'Events', icon: <Calendar size={28} /> },
+        { path: '/leaderboard', label: 'Ranks', icon: <Trophy size={28} /> },
         { path: '/profile', label: 'Profile', icon: <User size={28} /> },
     ];
 
@@ -45,6 +47,7 @@ const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
         { path: '/groups', label: 'Groups', icon: <Users size={28} /> },
         { path: '/calendar', label: 'Events', icon: <Calendar size={28} /> },
         { path: '/archive', label: 'Archive', icon: <Archive size={28} /> },
+        { path: '/leaderboard', label: 'Impact', icon: <Trophy size={28} /> },
         { path: '/profile', label: 'Settings', icon: <User size={28} /> },
     ];
 
@@ -55,6 +58,7 @@ const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
         { path: '/manage-notices', label: 'Manage', icon: <PlusSquare size={28} /> },
         { path: '/groups', label: 'Communities', icon: <Users size={28} /> },
         { path: '/calendar', label: 'Calendar', icon: <Calendar size={28} /> },
+        { path: '/leaderboard', label: 'Badges', icon: <Trophy size={28} /> },
         { path: '/profile', label: 'Settings', icon: <User size={28} /> },
     ];
 

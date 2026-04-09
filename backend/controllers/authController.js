@@ -41,9 +41,9 @@ exports.register = async (req, res) => {
 
     if (role === 'student' && department) {
       const Group = require("../models/Group");
-      const community = await Group.findOne({ 
-        name: new RegExp(`^${department}$`, 'i'), 
-        isCommunity: true 
+      const community = await Group.findOne({
+        name: new RegExp(`^${department}$`, 'i'),
+        isCommunity: true
       });
 
       if (community) {
@@ -68,6 +68,10 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    if (user.isLocked) {
+      return res.status(403).json({ message: "This account has been locked. Please contact the administrator." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -112,6 +116,19 @@ exports.updateProfile = async (req, res) => {
     if (year !== undefined) user.year = year;
     if (rollNumber !== undefined) user.rollNumber = rollNumber;
 
+    // New Profile Enhancement Fields
+    if (req.body.bio !== undefined) user.bio = req.body.bio;
+    if (req.body.officeHours !== undefined) user.officeHours = req.body.officeHours;
+    if (req.body.specialization !== undefined) user.specialization = req.body.specialization;
+    if (req.body.socialLinks) {
+      try {
+        const socials = typeof req.body.socialLinks === 'string' ? JSON.parse(req.body.socialLinks) : req.body.socialLinks;
+        user.socialLinks = { ...user.socialLinks, ...socials };
+      } catch (e) {
+        console.error("Failed to parse socialLinks JSON", e);
+      }
+    }
+
     if (req.file) {
       user.profilePic = `/uploads/${req.file.filename}`;
     }
@@ -128,6 +145,10 @@ exports.updateProfile = async (req, res) => {
         department: user.department || "",
         year: user.year || "",
         rollNumber: user.rollNumber || "",
+        bio: user.bio || "",
+        officeHours: user.officeHours || "",
+        specialization: user.specialization || "",
+        socialLinks: user.socialLinks || {},
       },
     });
   } catch (error) {
@@ -296,11 +317,11 @@ exports.getConnections = async (req, res) => {
     const user = await User.findById(req.user.id)
       .populate("following", "name role profilePic department")
       .populate("followers", "name role profilePic department");
-    
+
     // Connections = both following and followers
     res.json({
-        following: user.following,
-        followers: user.followers
+      following: user.following,
+      followers: user.followers
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -311,6 +332,63 @@ exports.getFollowing = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate("following", "name role profilePic department");
     res.json(user.following);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getPublicProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("-password -resetPasswordToken -resetPasswordExpires")
+      .populate("followers", "name profilePic department")
+      .populate("following", "name profilePic department");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Get recent notices by this user
+    const Notice = require("../models/Notice");
+    const recentNotices = await Notice.find({ createdBy: user._id })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.json({
+      ...user._doc,
+      recentNotices
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.status = status;
+    await user.save();
+    res.json({ message: "Status updated successfully", status: user.status });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getUserStatus = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("status");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ status: user.status });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select("name role profilePic department status");
+    res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,0 +1,204 @@
+.leaderboard-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.top-three-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4.5rem;
+    align-items: flex-end;
+}
+
+.section-title {
+    font-family: var(--font-game);
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+    border-left: 4px solid var(--primary-color);
+    padding-left: 1rem;
+}
+
+.podium-badges {
+    display: flex;
+    gap: 8px;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+.podium-badge-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.podium-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.podium-card.rank-1 {
+    transform: scale(1.1);
+    z-index: 2;
+    border-color: #ffd70044;
+    box-shadow: 0 10px 40px rgba(255, 215, 0, 0.15);
+}
+
+.podium-card.rank-2 {
+    z-index: 1;
+}
+
+.podium-card.rank-3 {
+    z-index: 1;
+}
+
+.podium-rank-icon {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-color);
+    padding: 8px;
+    border-radius: 50%;
+    border: 3px solid var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.podium-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    border: 4px solid var(--card-bg);
+    box-shadow: 0 0 0 2px var(--border-color);
+}
+
+.podium-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.podium-xp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 215, 0, 0.1);
+    color: #f59e0b;
+    padding: 0.5rem 1.25rem;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 1rem;
+}
+
+.leaderboard-table-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard-table th {
+    background: rgba(139, 92, 246, 0.05);
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.leaderboard-table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.rank-cell {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.avatar-sm {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    overflow: hidden;
+    font-size: 1.2rem;
+}
+
+.avatar-sm img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.xp-badge {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 0.35rem 0.85rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.table-badge-icon {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+    cursor: help;
+}
+
+@media (max-width: 768px) {
+    .top-three-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .podium-card.rank-1 {
+        transform: none;
+    }
+
+    .leaderboard-page {
+        padding: 1rem;
+    }
+}

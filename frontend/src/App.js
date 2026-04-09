@@ -23,6 +23,8 @@ import CalendarPage from "./pages/CalendarPage";
 import FacultyAnalytics from "./pages/FacultyAnalytics";
 import AboutPage from "./pages/AboutPage";
 import ResetPassword from "./pages/ResetPassword";
+import Leaderboard from "./pages/Leaderboard";
+import PublicProfile from "./pages/PublicProfile";
 
 function App() {
   return (
@@ -166,6 +168,24 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin", "faculty", "student"]}>
                 <ProfileSettings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/leaderboard"
+            element={
+              <ProtectedRoute>
+                <Leaderboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/user/:id"
+            element={
+              <ProtectedRoute>
+                <PublicProfile />
               </ProtectedRoute>
             }
           />

@@ -1,6 +1,7 @@
 const Notice = require("../models/Notice");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
+const { awardXP } = require("../utils/gamification");
 
 // ================= CREATE NOTICE =================
 exports.createNotice = async (req, res) => {
@@ -55,7 +56,7 @@ exports.createNotice = async (req, res) => {
         type: "mention"
       }));
       await Notification.insertMany(mentionNotifications);
-      
+
       // Emit socket for each mention
       if (req.io) {
         mentionIds.forEach(mId => {
@@ -79,6 +80,9 @@ exports.createNotice = async (req, res) => {
     }));
 
     await Notification.insertMany(notifications);
+
+    // 🏆 Gamification: Award XP for posting
+    await awardXP(req.user.id, "POST_NOTICE");
 
     res.status(201).json(notice);
   } catch (error) {
@@ -180,7 +184,7 @@ exports.getNotices = async (req, res) => {
     }
 
     const notices = await Notice.find(query)
-      .populate("createdBy", "name")
+      .populate("createdBy", "name profilePic")
       .sort({ createdAt: -1 });
     res.json(notices);
   } catch (error) {
@@ -205,7 +209,7 @@ exports.addComment = async (req, res) => {
     };
 
     notice.comments.push(newComment);
-    
+
     // 🏷️ Handle Mentions in Comment
     const mentionIds = req.body.mentions || [];
     if (mentionIds.length > 0) {
@@ -219,7 +223,7 @@ exports.addComment = async (req, res) => {
       }));
       await Notification.insertMany(mentionNotifications);
       if (req.io) {
-          mentionIds.forEach(mId => req.io.to(mId).emit("newNotification", { title: "Mentioned in comment" }));
+        mentionIds.forEach(mId => req.io.to(mId).emit("newNotification", { title: "Mentioned in comment" }));
       }
     }
 
@@ -386,7 +390,7 @@ exports.getArchivedNotices = async (req, res) => {
     // No additional filter needed for Admin
 
     const notices = await Notice.find(query)
-      .populate("createdBy", "name")
+      .populate("createdBy", "name profilePic")
       .sort({ createdAt: -1 });
     res.json(notices);
   } catch (error) {
@@ -405,7 +409,7 @@ exports.getAllNotices = async (req, res) => {
       query.createdBy = req.user.id;
     }
     const notices = await Notice.find(query)
-      .populate("createdBy", "name")
+      .populate("createdBy", "name profilePic")
       .sort({ createdAt: -1 });
     res.json(notices);
   } catch (error) {
@@ -418,7 +422,7 @@ exports.getAllNotices = async (req, res) => {
 exports.getNoticeById = async (req, res) => {
   try {
     const notice = await Notice.findById(req.params.id)
-      .populate("createdBy", "name")
+      .populate("createdBy", "name profilePic")
       .populate("readBy", "name profilePic");
 
     if (!notice) {
@@ -476,6 +480,9 @@ exports.voteInPoll = async (req, res) => {
     // Add new vote
     notice.poll.options[optionIndex].votes.push(req.user.id);
     await notice.save();
+
+    // 🏆 Gamification: Award XP for voting
+    await awardXP(req.user.id, "VOTE_POLL");
 
     res.json(notice);
   } catch (error) {
@@ -573,7 +580,7 @@ exports.getSavedNotices = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate({
       path: 'savedNotices',
-      populate: { path: 'createdBy', select: 'name' }
+      populate: { path: 'createdBy', select: 'name profilePic' }
     });
 
     // Filter out any potential nulls if a saved notice was deleted
@@ -616,6 +623,10 @@ exports.toggleLikeNotice = async (req, res) => {
     }
 
     await notice.save();
+
+    // 🏆 Gamification: Award XP for liking
+    if (liked) await awardXP(req.user.id, "LIKE_NOTICE");
+
     res.json({ message: liked ? "Notice liked" : "Notice unliked", liked, likeCount: notice.likes.length });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -647,21 +658,25 @@ exports.toggleReaction = async (req, res) => {
       // New reaction
       notice.reactions.push({ user: req.user.id, type: reactionType });
       updatedReaction = reactionType;
-      
+
       // Notify creator
       if (notice.createdBy.toString() !== req.user.id) {
-          await Notification.create({
-            recipient: notice.createdBy,
-            sender: req.user.id,
-            title: "New Reaction",
-            message: `Someone reacted with ${reactionType} to your notice.`,
-            noticeId: notice._id,
-            type: "reaction"
-          });
+        await Notification.create({
+          recipient: notice.createdBy,
+          sender: req.user.id,
+          title: "New Reaction",
+          message: `Someone reacted with ${reactionType} to your notice.`,
+          noticeId: notice._id,
+          type: "reaction"
+        });
       }
     }
 
     await notice.save();
+
+    // 🏆 Gamification: Award XP for reacting
+    if (updatedReaction) await awardXP(req.user.id, "REACTION");
+
     res.json({ reactions: notice.reactions });
   } catch (error) {
     res.status(500).json({ message: error.message });

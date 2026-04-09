@@ -288,6 +288,15 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+.about-hero__cursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.8em;
+  background: white;
+  margin-left: 6px;
+  vertical-align: middle;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.8);
+}
 .about-hero__sub {
   font-family: var(--font-body);
   font-size: 16px;

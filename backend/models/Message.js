@@ -14,11 +14,28 @@ const messageSchema = new mongoose.Schema(
         },
         content: {
             type: String,
-            required: true,
+            default: "",
+        },
+        mediaUrl: {
+            type: String,
+            default: null,
+        },
+        mediaType: {
+            type: String, // 'image', 'video', 'document'
+            default: null,
         },
         read: {
             type: Boolean,
             default: false,
+        },
+        isEdited: {
+            type: Boolean,
+            default: false,
+        },
+        replyTo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Message",
+            default: null,
         },
     },
     { timestamps: true }

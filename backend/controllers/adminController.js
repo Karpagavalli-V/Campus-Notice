@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const csv = require("csvtojson");
 
 exports.createUser = async (req, res) => {
   try {
@@ -24,6 +25,75 @@ exports.createUser = async (req, res) => {
     });
 
     res.status(201).json({ message: "User created successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.bulkCreateUsers = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "Please upload a CSV file" });
+    }
+
+    const jsonArray = await csv().fromFile(req.file.path);
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: []
+    };
+
+    const defaultPassword = "CampusPassword123";
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+    for (const userData of jsonArray) {
+      try {
+        // validation
+        if (!userData.email || !userData.name || !userData.role) {
+          throw new Error(`Missing required fields for ${userData.email || 'unknown'}`);
+        }
+
+        const email = userData.email.toLowerCase().trim();
+        const exists = await User.findOne({ email });
+
+        if (exists) {
+          throw new Error(`User with email ${email} already exists`);
+        }
+
+        await User.create({
+          name: userData.name,
+          email,
+          role: userData.role,
+          department: userData.department || "",
+          year: userData.year || "",
+          rollNumber: userData.rollNumber || "",
+          password: hashedPassword
+        });
+        results.success++;
+      } catch (err) {
+        results.failed++;
+        results.errors.push(err.message);
+      }
+    }
+
+    res.json({
+      message: `Bulk creation complete. Success: ${results.success}, Failed: ${results.failed}`,
+      results
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.toggleAccountLock = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.isLocked = !user.isLocked;
+    await user.save();
+
+    res.json({ message: `User account ${user.isLocked ? 'locked' : 'unlocked'} successfully`, isLocked: user.isLocked });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

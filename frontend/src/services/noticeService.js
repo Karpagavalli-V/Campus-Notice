@@ -25,6 +25,11 @@ export const deleteNotice = async (id) => {
   return response.data;
 };
 
+export const refineNotice = async (text) => {
+  const response = await api.post("/ai/refine", { text });
+  return response.data;
+};
+
 export const updateNotice = async (id, data) => {
   const response = await api.put(`/notices/${id}`, data);
   return response.data;
@@ -55,11 +60,11 @@ export const toggleLikeNotice = async (id) => {
 };
 
 export const toggleReaction = async (id, reactionType) => {
-    const response = await api.post(`/notices/${id}/reaction`, { reactionType });
-    return response.data;
+  const response = await api.post(`/notices/${id}/reaction`, { reactionType });
+  return response.data;
 };
 
 export const toggleCommentReaction = async (id, commentId, reactionType) => {
-    const response = await api.post(`/notices/${id}/comment/${commentId}/reaction`, { reactionType });
-    return response.data;
+  const response = await api.post(`/notices/${id}/comment/${commentId}/reaction`, { reactionType });
+  return response.data;
 };
