@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
     Home,
@@ -16,12 +16,34 @@ import {
     Sun,
     Moon,
     Users,
-    Trophy
+    Trophy,
+    Download
 } from 'lucide-react';
 import './Sidebar.css';
 
 const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
     const navigate = useNavigate();
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+    useEffect(() => {
+        const handleBeforeInstallPrompt = (e) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            }
+            setDeferredPrompt(null);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.clear();
@@ -89,6 +111,12 @@ const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
             </nav>
 
             <div className="sidebar-footer">
+                {deferredPrompt && (
+                    <div className="nav-link theme-btn install-btn" onClick={handleInstallClick} style={{ color: '#06b6d4' }}>
+                        <span className="nav-icon"><Download size={28} /></span>
+                        <span className="nav-text">Install App</span>
+                    </div>
+                )}
                 <div className="nav-link theme-btn" onClick={onToggleTheme}>
                     <span className="nav-icon">
                         {isDarkMode ? <Sun size={28} /> : <Moon size={28} />}

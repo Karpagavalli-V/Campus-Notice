@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 const connectDB = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
@@ -20,6 +21,8 @@ const path = require("path");
 // ... imports
 
 // Middleware
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })); // Allow serving images/uploads
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));

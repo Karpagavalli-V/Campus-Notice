@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Bookmark, Newspaper, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getNotices, getSavedNotices, toggleSaveNotice } from "../services/noticeService";
+import { toggleFollow, getFollowing } from "../services/authService";
 import { useToast } from "../context/ToastContext";
 import NoticeCard from "../components/common/NoticeCard/NoticeCard";
 import NoticeStories from "../components/common/NoticeStories/NoticeStories";
@@ -48,10 +49,7 @@ function StudentDashboard() {
 
   const fetchFollowingIds = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/following", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      const data = await response.json();
+      const data = await getFollowing();
       setFollowingIds(data.map(user => user._id));
     } catch (err) {
       console.error("Error fetching following:", err);
@@ -89,15 +87,13 @@ function StudentDashboard() {
 
   const handleFollow = async (id) => {
       try {
-          const response = await fetch(`http://localhost:5000/api/auth/follow/${id}`, {
-              method: 'PUT',
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-          });
-          const res = await response.json();
-          setFollowingIds(prev => [...prev, id]);
+          const res = await toggleFollow(id);
+          setFollowingIds(prev =>
+              res.isFollowing ? [...prev, id] : prev.filter(userId => userId !== id)
+          );
           showToast(res.message, "success");
       } catch (err) {
-          showToast("Failed to follow user", "error");
+          showToast(err.response?.data?.message || "Failed to follow user", "error");
       }
   };
 
