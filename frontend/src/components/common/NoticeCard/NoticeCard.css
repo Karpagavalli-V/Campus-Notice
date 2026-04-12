@@ -19,156 +19,86 @@
     box-shadow: 0 12px 30px rgba(139, 92, 246, 0.1);
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
+/* Modern Minimalist Feed Items */
+.card-content-modern {
+    padding: 24px;
 }
 
-.user-profile-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.user-avatar-modern {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-    background: var(--gaming-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
+.mockup-pill {
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 0.7rem;
     font-weight: 800;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    font-family: var(--font-game);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'Inter', var(--font-ui);
 }
 
-.user-info-text {
-    display: flex;
-    flex-direction: column;
+/* Category Pill Variations */
+.pill-urgent, .pill-emergency, .pill-alert {
+    background-color: #f3e8ff;
+    color: #a855f7;
 }
 
-.name-row {
+.pill-events, .pill-event {
+    background-color: #e0f2fe;
+    color: #38bdf8;
+}
+
+.pill-sports {
+    background-color: #fce7f3;
+    color: #ec4899;
+}
+
+.pill-academic, .pill-course {
+    background-color: #ecfdf5;
+    color: #10b981;
+}
+
+.pill-general, .pill-club {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+.modern-title {
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    line-height: 1.35;
+    font-family: var(--font-ui);
+}
+
+.modern-meta-row {
     display: flex;
     align-items: center;
+    font-size: 0.8rem;
+    color: #94a3b8;
     gap: 8px;
-}
-
-.user-name-modern {
-    font-weight: 700;
-    font-size: 1rem;
-    color: var(--text-primary);
-    font-family: var(--font-ui);
-    letter-spacing: 0.2px;
-}
-
-.follow-btn-modern {
-    background: transparent;
-    border: none;
-    color: var(--primary-color);
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    padding: 2px 8px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.follow-btn-modern:hover {
-    background: rgba(139, 92, 246, 0.08);
-}
-
-.follow-btn-modern.following {
-    color: var(--text-muted);
-}
-
-.notice-meta-modern {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-family: var(--font-ui);
-}
-
-.meta-dot {
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    margin-bottom: 0;
+    font-weight: 500;
 }
 
 .more-btn-modern {
     background: transparent;
-    color: var(--text-muted);
+    border: none;
+    color: #cbd5e1;
     cursor: pointer;
-    padding: 8px;
+    padding: 4px;
     border-radius: 50%;
-    transition: background 0.2s ease;
+    transition: color 0.2s;
 }
 
 .more-btn-modern:hover {
-    background: var(--bg-color);
-    color: var(--text-primary);
+    color: #64748b;
 }
 
-.poster-area {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding: 40px;
-    color: white;
-    text-align: center;
-}
-
-/* Sophisticated Gradients */
-.category-general { background: #121212; }
-.category-academic { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
-.category-events { background: linear-gradient(135deg, #f43f5e 0%, #fb923c 100%); }
-.category-exams { background: linear-gradient(135deg, #0ea5e9 0%, #2dd4bf 100%); }
-.category-support { background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); }
-.category-emergency { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
-
-.poster-overlay {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
-    z-index: 1;
-}
-
-.poster-content {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-}
-
-.poster-title {
-    font-size: 2.5rem;
-    font-weight: 900;
-    margin: 0;
-    line-height: 1;
-    font-family: var(--font-game);
-    letter-spacing: -2px;
-}
-
-.poster-divider {
-    width: 60px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    margin: 20px auto;
-}
-
-.poster-text {
-    font-size: 1.1rem;
-    font-weight: 500;
-    line-height: 1.4;
-    margin: 0;
-    opacity: 0.9;
-    font-family: var(--font-ui);
+.inline-carousel-wrapper {
+    margin-top: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .card-priority-badge {

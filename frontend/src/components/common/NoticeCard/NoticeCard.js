@@ -147,132 +147,55 @@ const NoticeCard = ({ notice, onClick, isSaved, onToggleSave }) => {
                 damping: 15
             }}
         >
-            {/* Header: Professional Info */}
-            <header className="card-header">
-                <div className="user-profile-wrapper">
-                    <motion.div
-                        className="user-avatar-modern"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/user/${notice.author?._id || notice.createdBy?._id}`); }}
-                        style={{ cursor: 'pointer' }}
-                        whileHover={{
-                            scale: 1.15,
-                            rotate: [0, -10, 10, 0],
-                            boxShadow: "0 0 15px var(--brand-primary)"
-                        }}
-                    >
-                        {notice.author?.name?.[0]?.toUpperCase() || notice.createdBy?.name?.[0]?.toUpperCase() || 'N'}
-                    </motion.div>
-                    <div className="user-info-text">
-                        <div className="name-row">
-                            <span
-                                className="user-name-modern"
-                                onClick={(e) => { e.stopPropagation(); navigate(`/user/${notice.author?._id || notice.createdBy?._id}`); }}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                {notice.author?.name || notice.createdBy?.name || 'Campus Faculty'}
-                            </span>
-                            {(notice.author?._id || notice.createdBy?._id) && (notice.author?._id !== localStorage.getItem('userId') && notice.createdBy?._id !== localStorage.getItem('userId')) && (
-                                <>
-                                    <span className="meta-dot small">•</span>
-                                    <motion.button
-                                        onClick={handleFollowClick}
-                                        whileHover={{ scale: 1.05, backgroundColor: "var(--brand-primary)", color: "white" }}
-                                        whileTap={{ scale: 0.9 }}
-                                        className={`follow-btn-modern ${isFollowing ? 'following' : ''}`}
-                                    >
-                                        {isFollowing ? 'Following' : 'Follow'}
-                                    </motion.button>
-                                </>
-                            )}
-                        </div>
-                        <span className="notice-meta-modern">{notice.department} • {formatTimeAgo(notice.createdAt)}</span>
+            {/* Modern Content Area */}
+            <div className="card-content-modern">
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '12px' }}>
+                    <div className={`mockup-pill pill-${(notice.category || 'general').toLowerCase().replace(/\s+/g, '-')}`}>
+                        <span>{notice.category === 'Emergency' ? '🚨' : notice.category === 'Events' ? '🎉' : notice.category === 'Academic' ? '📚' : notice.category === 'Sports' ? '🏆' : '📌'}</span> 
+                        {notice.category || 'General'}
                     </div>
+                    <motion.button
+                        whileHover={{ scale: 1.2, rotate: 90 }}
+                        whileTap={{ scale: 0.8 }}
+                        className="more-btn-modern"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <MoreHorizontal size={18} />
+                    </motion.button>
                 </div>
-                <motion.button
-                    whileHover={{ scale: 1.2, rotate: 90 }}
-                    whileTap={{ scale: 0.8 }}
-                    className="more-btn-modern"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <MoreHorizontal size={18} />
-                </motion.button>
-            </header>
+                
+                <h4 className="modern-title">{notice.title || 'Campus Update'}</h4>
+                
+                <div className="modern-meta-row">
+                    <span>{notice.department || notice.author?.name || notice.createdBy?.name || 'Department'}</span>
+                    <span>•</span>
+                    <span>{formatTimeAgo(notice.createdAt)}</span>
+                </div>
 
-            {/* Poster Area */}
-            <div className={`poster-area category-${(notice.category || 'General').toLowerCase().replace(/\s+/g, '-')}`}>
+                <p className="modern-body-text" style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: images.length > 0 ? '16px' : '0', lineHeight: '1.5', width: '100%', textAlign: 'left' }}>
+                    {(notice.content || '').substring(0, 300)}
+                    {notice.content?.length > 300 && '...'}
+                </p>
+
+                {/* Inline Image Carousel */}
                 <AnimatePresence mode="popLayout" initial={false}>
-                    {images.length > 0 ? (
+                    {images.length > 0 && (
                         <motion.div
                             key={`carousel-${currentImageIndex}`}
-                            initial={{ opacity: 0, x: 100 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -100 }}
-                            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                            className="carousel-view"
-                            style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}
+                            className="inline-carousel-wrapper"
+                            style={{ position: 'relative', width: '100%', borderRadius: '16px', overflow: 'hidden', backgroundColor: 'var(--bg-color)', aspectRatio: '16/9' }}
                         >
                             <img
                                 src={`http://localhost:5000${images[currentImageIndex].url}`}
-                                alt="Notice Slide"
+                                alt="Notice Attachment"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                             {images.length > 1 && (
                                 <>
                                     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="carousel-nav prev" onClick={prevImage}>❮</motion.button>
                                     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="carousel-nav next" onClick={nextImage}>❯</motion.button>
-                                    <div className="carousel-dots">
-                                        {images.map((_, idx) => (
-                                            <motion.div
-                                                key={idx}
-                                                whileHover={{ scale: 1.5 }}
-                                                onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); }}
-                                                style={{ padding: '4px', cursor: 'pointer' }}
-                                            >
-                                                <span style={{
-                                                    display: 'block',
-                                                    width: idx === currentImageIndex ? '16px' : '6px',
-                                                    height: '6px',
-                                                    borderRadius: '3px',
-                                                    background: idx === currentImageIndex ? '#fff' : 'rgba(255,255,255,0.4)',
-                                                    transition: 'all 0.3s'
-                                                }} />
-                                            </motion.div>
-                                        ))}
-                                    </div>
                                 </>
                             )}
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="text-poster"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            whileHover={{ scale: 1.02 }}
-                            className="poster-content-wrapper"
-                            style={{ width: '100%', height: '100%' }}
-                        >
-                            <div className="poster-overlay"></div>
-                            <div className="poster-content">
-                                <motion.h2
-                                    initial={{ y: 10, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    className="poster-title"
-                                >{notice.title || 'Campus Update'}</motion.h2>
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: '60px' }}
-                                    className="poster-divider"
-                                ></motion.div>
-                                <motion.p
-                                    initial={{ y: 10, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 0.1 }}
-                                    className="poster-text"
-                                >
-                                    {(notice.content || '').substring(0, 200)}
-                                    {notice.content?.length > 200 && '...'}
-                                </motion.p>
-                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

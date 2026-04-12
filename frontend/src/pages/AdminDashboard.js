@@ -81,6 +81,7 @@ function AdminDashboard() {
 
   return (
     <motion.div 
+      key="admin-dashboard-content"
       initial="hidden"
       animate="visible"
       variants={containerVariants}

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { loginUser } from "../services/authService";
 import { useToast } from "../context/ToastContext";
 import AuthSidebar from "../components/layout/AuthSidebar";
+import confetti from "canvas-confetti";
 import "../styles/AuthLayout.css";
 
 function Login() {
@@ -15,8 +16,42 @@ function Login() {
     const navigate = useNavigate();
     const { showToast } = useToast();
 
+    const playSound = (type) => {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if (type === 'click') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); 
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'success') {
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+                oscillator.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.3); // G5
+                oscillator.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.45); // C6
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.0);
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 1.0);
+            }
+        } catch(e) {
+            console.log("Audio not supported");
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        playSound('click'); // Play click sound
         setLoading(true);
         setError(false);
         try {
@@ -29,11 +64,25 @@ function Login() {
             localStorage.setItem("email", email);
             localStorage.setItem("profilePic", data.profilePic || "");
 
+            playSound('success'); // Play gamified success chime!
+            
+            // Trigger an awesome gamified confetti explosion
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#4f46e5', '#ec4899', '#10b981', '#f59e0b']
+            });
+
             showToast(`Welcome back, ${data.name}!`, "success");
 
-            if (data.role === "admin") navigate("/admin");
-            else if (data.role === "faculty") navigate("/faculty");
-            else navigate("/student");
+            // Add a tiny delay for the sound to play before routing
+            setTimeout(() => {
+                if (data.role === "admin") navigate("/admin");
+                else if (data.role === "faculty") navigate("/faculty");
+                else navigate("/student");
+            }, 600);
+            
         } catch (err) {
             setError(true);
             showToast(err.response?.data?.message || "Invalid credentials", "error");
