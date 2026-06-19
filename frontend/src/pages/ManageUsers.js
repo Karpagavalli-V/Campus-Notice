@@ -7,6 +7,9 @@ import Badge from "../components/common/Badge/Badge";
 import ConfirmDialog from "../components/common/ConfirmDialog/ConfirmDialog";
 import "../styles/Dashboard.css";
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+
 function ManageUsers() {
   const { showToast } = useToast();
   const [users, setUsers] = useState([]);
@@ -131,7 +134,7 @@ function ManageUsers() {
                 <td>
                   <div className="user-table-avatar">
                     {u.profilePic ? (
-                      <img src={`http://localhost:5000${u.profilePic}`} alt="" />
+                  <img src={`${API_BASE}${u.profilePic}`} alt="" />
                     ) : (
                       <span>{u.name?.[0]?.toUpperCase()}</span>
                     )}

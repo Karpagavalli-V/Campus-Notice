@@ -112,7 +112,13 @@ const CalendarPage = () => {
 
         for (let d = 1; d <= numDays; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            const dayNotices = notices.filter(n => n.expiryDate && n.expiryDate.split('T')[0] === dateStr);
+            // Show notices on BOTH their creation date and expiry date
+            const expiryNotices = notices.filter(n => n.expiryDate && n.expiryDate.split('T')[0] === dateStr);
+            const createdNotices = notices.filter(n => n.createdAt && n.createdAt.split('T')[0] === dateStr && n.expiryDate?.split('T')[0] !== dateStr);
+            const dayNotices = [
+                ...expiryNotices.map(n => ({ ...n, _displayType: 'expiry' })),
+                ...createdNotices.map(n => ({ ...n, _displayType: 'posted' }))
+            ];
             const isToday = new Date().toDateString() === new Date(year, month, d).toDateString();
 
             cells.push(
@@ -145,7 +151,7 @@ const CalendarPage = () => {
                                 className="calendar-notice-tag"
                                 onClick={() => navigate(`/notice/${n._id}`)}
                                 style={{
-                                    background: n.priority === 'high' ? '#ef4444' : getCategoryColor(n.category),
+                                    background: n._displayType === 'posted' ? '#6366f1' : (n.priority === 'high' ? '#ef4444' : getCategoryColor(n.category)),
                                     color: 'white',
                                     fontSize: '0.7rem',
                                     padding: '2px 6px',
@@ -155,9 +161,10 @@ const CalendarPage = () => {
                                     textOverflow: 'ellipsis',
                                     cursor: 'pointer',
                                     fontWeight: 600,
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    opacity: n._displayType === 'posted' ? 0.75 : 1
                                 }}
-                                title={`${n.category}: ${n.title}`}
+                                title={`${n._displayType === 'posted' ? '📝 Posted' : '⏰ Expires'}: ${n.title}`}
                             >
                                 {n.title}
                             </motion.div>
@@ -220,16 +227,16 @@ const CalendarPage = () => {
             
             <div className="calendar-legend" style={{ marginTop: '2rem', display: 'flex', flexWrap: 'wrap', gap: '1.5rem', justifyContent: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', opacity: 0.8 }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#6366f1' }}></div> Events
+                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#6366f1' }}></div> Posted/Events
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', opacity: 0.8 }}>
                     <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#ef4444' }}></div> Exams / High Priority
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', opacity: 0.8 }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#10b981' }}></div> Academic
+                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#10b981' }}></div> Academic (Expires)
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', opacity: 0.8 }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#f59e0b' }}></div> Support
+                    <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#f59e0b' }}></div> Support (Expires)
                 </div>
             </div>
         </motion.div>

@@ -8,19 +8,23 @@ const router = express.Router();
 // Unified search
 router.get("/", protect, async (req, res) => {
   try {
-    const { query, filter, department, company } = req.query;
+    const { query, filter, department, company, startDate, endDate, page = 1, limit = 50 } = req.query;
     
-    if (!query) {
-      return res.json({ posts: [], users: [] });
+    // Optionally allow search even without a query string if other filters exist
+    if (!query && !department && !filter && !company && !startDate && !endDate) {
+      return res.json({ posts: [], events: [], users: [], totalNotices: 0 });
     }
 
-    const searchRegex = new RegExp(query, "i");
+    const searchRegex = new RegExp(query || "", "i");
     
-    // Build user search
-    const userQuery = {
-      $or: [{ name: searchRegex }, { department: searchRegex }, { rollNumber: searchRegex }]
-    };
-    const users = await User.find(userQuery).select("-password").limit(10);
+    // Build user search (only if query exists)
+    let users = [];
+    if (query) {
+      const userQuery = {
+        $or: [{ name: searchRegex }, { department: searchRegex }, { rollNumber: searchRegex }]
+      };
+      users = await User.find(userQuery).select("-password").limit(10);
+    }
     
     // Build Notice search
     const noticeQuery = {
@@ -47,7 +51,20 @@ router.get("/", protect, async (req, res) => {
        ];
     }
 
-    const notices = await Notice.find(noticeQuery).populate("createdBy", "name profilePic").limit(50);
+    if (startDate || endDate) {
+      noticeQuery.createdAt = {};
+      if (startDate) noticeQuery.createdAt.$gte = new Date(startDate);
+      if (endDate) noticeQuery.createdAt.$lte = new Date(endDate);
+    }
+
+    // Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const totalNotices = await Notice.countDocuments(noticeQuery);
+    const notices = await Notice.find(noticeQuery)
+      .populate("createdBy", "name profilePic")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
     
     // Split notices into Posts and Events based on category
     const posts = notices;
@@ -56,7 +73,10 @@ router.get("/", protect, async (req, res) => {
     res.json({
         users,
         posts,
-        events
+        events,
+        totalNotices,
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalNotices / parseInt(limit))
     });
 
   } catch (error) {

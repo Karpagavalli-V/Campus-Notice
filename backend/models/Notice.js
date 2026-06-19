@@ -56,6 +56,11 @@ const noticeSchema = new mongoose.Schema(
       },
     ],
 
+    views: {
+      type: Number,
+      default: 0,
+    },
+
     readBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

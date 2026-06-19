@@ -5,6 +5,8 @@ import { getLeaderboard } from "../services/gamificationService";
 import Badge from "../components/common/Badge/Badge";
 import "../styles/Leaderboard.css";
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const Leaderboard = () => {
     const [topStudents, setTopStudents] = useState([]);
     const [topFaculty, setTopFaculty] = useState([]);
@@ -66,7 +68,7 @@ const Leaderboard = () => {
                         </div>
                         <div className="podium-avatar">
                             {user.profilePic ? (
-                                <img src={`http://localhost:5000${user.profilePic}`} alt={user.name} />
+                                <img src={`${API_BASE}${user.profilePic}`} alt={user.name} />
                             ) : (
                                 <span>{user.name[0].toUpperCase()}</span>
                             )}
@@ -142,7 +144,7 @@ const Leaderboard = () => {
                                         <td className="user-cell">
                                             <div className="avatar-sm">
                                                 {user.profilePic ? (
-                                                    <img src={`http://localhost:5000${user.profilePic}`} alt="" />
+                                                    <img src={`${API_BASE}${user.profilePic}`} alt="" />
                                                 ) : (
                                                     user.name[0].toUpperCase()
                                                 )}

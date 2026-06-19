@@ -2,6 +2,7 @@ const Notice = require("../models/Notice");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 const { awardXP } = require("../utils/gamification");
+const { sendHighPriorityNoticeEmail } = require("../utils/emailService");
 
 // ================= CREATE NOTICE =================
 exports.createNotice = async (req, res) => {
@@ -80,6 +81,14 @@ exports.createNotice = async (req, res) => {
     }));
 
     await Notification.insertMany(notifications);
+
+    // 📧 Email for high-priority notices
+    if (notice.priority === 'high' || notice.priority === 'emergency') {
+      const followerDocs = await User.find({ _id: { $in: followers } }).select('email');
+      const emails = followerDocs.map(u => u.email).filter(Boolean);
+      // Fire and forget - do not await
+      sendHighPriorityNoticeEmail(emails, notice).catch(err => console.error('Email error:', err));
+    }
 
     // 🏆 Gamification: Award XP for posting
     await awardXP(req.user.id, "POST_NOTICE");
@@ -428,6 +437,9 @@ exports.getNoticeById = async (req, res) => {
     if (!notice) {
       return res.status(404).json({ message: "Notice not found" });
     }
+
+    // Increment views counter (fire-and-forget)
+    Notice.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }).exec();
 
     res.json(notice);
   } catch (error) {

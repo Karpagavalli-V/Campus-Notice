@@ -144,3 +144,77 @@ exports.getMessages = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Delete a group (creator or admin only)
+exports.deleteGroup = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const group = await Group.findById(id);
+    if (!group) return res.status(404).json({ message: "Group not found" });
+
+    const isCreator = group.creator.toString() === req.user.id;
+    const isAdmin = group.admins.map(a => a.toString()).includes(req.user.id);
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({ message: "Only group admin or creator can delete this group" });
+    }
+
+    await Group.findByIdAndDelete(id);
+    res.json({ message: "Group deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Remove a member from group (admin/creator only)
+exports.removeMember = async (req, res) => {
+  try {
+    const { id, memberId } = req.params;
+    const group = await Group.findById(id);
+    if (!group) return res.status(404).json({ message: "Group not found" });
+
+    const isCreator = group.creator.toString() === req.user.id;
+    const isAdmin = group.admins.map(a => a.toString()).includes(req.user.id);
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // Prevent removing the creator
+    if (memberId === group.creator.toString()) {
+      return res.status(400).json({ message: "Cannot remove the group creator" });
+    }
+
+    group.members = group.members.filter(m => m.toString() !== memberId);
+    group.admins = group.admins.filter(a => a.toString() !== memberId);
+    await group.save();
+
+    const populated = await Group.findById(id).populate("members", "name profilePic");
+    res.json(populated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Rename a group (admin/creator only)
+exports.renameGroup = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const group = await Group.findById(id);
+    if (!group) return res.status(404).json({ message: "Group not found" });
+
+    const isCreator = group.creator.toString() === req.user.id;
+    const isAdmin = group.admins.map(a => a.toString()).includes(req.user.id);
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    group.name = name;
+    await group.save();
+    res.json(group);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, X, PlusCircle, Trash2, Eye, Wand2 } from "lucide-react";
+import { Sparkles, X, PlusCircle, Trash2, Eye, Wand2, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAllNotices, deleteNotice, createNotice, refineNotice } from "../services/noticeService";
 import { useToast } from "../context/ToastContext";
 import Button from "../components/common/Button/Button";
 import Badge from "../components/common/Badge/Badge";
 import ConfirmDialog from "../components/common/ConfirmDialog/ConfirmDialog";
+import MarkdownContent from "../components/common/MarkdownContent";
 import "../styles/Dashboard.css";
 import "../styles/Form.css";
 
@@ -37,6 +38,7 @@ function ManageNotices() {
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [isAutoCategorized, setIsAutoCategorized] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     fetchNotices();
@@ -287,17 +289,32 @@ function ManageNotices() {
               </div>
 
               <div className="form-group">
-                <label>Content</label>
-                <textarea
-                  className="form-input"
-                  name="content"
-                  rows="4"
-                  placeholder="Detailed information..."
-                  value={notice.content}
-                  onChange={handleChange}
-                  onBlur={handlePredictiveCategory}
-                  required
-                />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <label style={{ margin: 0 }}>Content</label>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewMode(!previewMode)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: previewMode ? 'var(--primary-color)' : 'var(--card-bg)', color: previewMode ? 'white' : 'var(--text-muted)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '0.3rem 0.8rem', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '600', transition: 'all 0.2s' }}
+                  >
+                    {previewMode ? <><EyeOff size={13} /> Edit</> : <><Eye size={13} /> Preview</>}
+                  </button>
+                </div>
+                {previewMode ? (
+                  <div style={{ minHeight: '120px', padding: '0.75rem 1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: '1.7' }}>
+                    {notice.content ? <MarkdownContent content={notice.content} /> : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Nothing to preview yet...</span>}
+                  </div>
+                ) : (
+                  <textarea
+                    className="form-input"
+                    name="content"
+                    rows="4"
+                    placeholder="Supports **bold**, *italic*, `code`, bullet lists, etc."
+                    value={notice.content}
+                    onChange={handleChange}
+                    onBlur={handlePredictiveCategory}
+                    required
+                  />
+                )}
                 <button
                   type="button"
                   className="ai-refine-btn"

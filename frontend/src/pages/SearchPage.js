@@ -5,26 +5,33 @@ import { useNavigate } from "react-router-dom";
 import NoticeCard from "../components/common/NoticeCard/NoticeCard";
 import "../styles/Dashboard.css"; // Reuse dashboard styles
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+
 function SearchPage() {
     const navigate = useNavigate();
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState("All");
     const [department, setDepartment] = useState("");
     const [company, setCompany] = useState("");
-    const [results, setResults] = useState({ posts: [], events: [], users: [] });
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [page, setPage] = useState(1);
+    const [results, setResults] = useState({ posts: [], events: [], users: [], totalNotices: 0, totalPages: 1 });
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("posts");
 
-    const handleSearch = async (e) => {
+    const handleSearch = async (e, targetPage = 1) => {
         if (e) e.preventDefault();
         setLoading(true);
         try {
             const res = await api.get('/search', {
                 params: {
-                    query, filter, department, company
+                    query, filter, department, company, startDate, endDate, page: targetPage, limit: 10
                 }
             });
             setResults(res.data);
+            setPage(targetPage);
         } catch (error) {
             console.error("Search failed:", error);
         } finally {
@@ -41,7 +48,7 @@ function SearchPage() {
                     <div key={user._id} className="user-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--card-bg)' }}>
                         <div className="avatar-circle">
                             {user.profilePic ? (
-                                <img src={`http://localhost:5000${user.profilePic}`} alt="avatar" className="avatar-img" />
+                                <img src={`${API_BASE}${user.profilePic}`} alt="avatar" className="avatar-img" />
                             ) : (
                                 <Users size={24} />
                             )}
@@ -111,31 +118,71 @@ function SearchPage() {
                         value={company}
                         onChange={e => setCompany(e.target.value)}
                     />
+                    
+                    <input 
+                        className="form-input"
+                        type="date"
+                        value={startDate}
+                        onChange={e => setStartDate(e.target.value)}
+                        style={{ width: 'auto', flex: 1 }}
+                        placeholder="Start Date"
+                    />
+                    <span style={{ color: 'var(--text-muted)' }}>-</span>
+                    <input 
+                        className="form-input"
+                        type="date"
+                        value={endDate}
+                        onChange={e => setEndDate(e.target.value)}
+                        style={{ width: 'auto', flex: 1 }}
+                        placeholder="End Date"
+                    />
                 </div>
             </form>
 
             {loading ? (
                 <div style={{ textAlign: 'center', margin: '4rem 0' }}><div className="loader"></div></div>
             ) : (
-                query && (
-                    <div className="search-results">
-                        <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem' }}>
-                            <button onClick={() => setActiveTab("posts")} style={{ padding: '0.75rem 1.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'posts' ? '2px solid var(--brand-primary)' : 'none', color: activeTab === 'posts' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'posts' ? 'bold' : 'normal', cursor: 'pointer' }}>
-                                Posts & Announcements ({results.posts?.length || 0})
-                            </button>
-                            <button onClick={() => setActiveTab("events")} style={{ padding: '0.75rem 1.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'events' ? '2px solid var(--brand-primary)' : 'none', color: activeTab === 'events' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'events' ? 'bold' : 'normal', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Calendar size={18} /> Events ({results.events?.length || 0})
-                            </button>
-                            <button onClick={() => setActiveTab("users")} style={{ padding: '0.75rem 1.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'users' ? '2px solid var(--brand-primary)' : 'none', color: activeTab === 'users' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'users' ? 'bold' : 'normal', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Users size={18} /> People ({results.users?.length || 0})
-                            </button>
-                        </div>
+                <div className="search-results">
+                    <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem' }}>
+                        <button onClick={() => setActiveTab("posts")} style={{ padding: '0.75rem 1.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'posts' ? '2px solid var(--brand-primary)' : 'none', color: activeTab === 'posts' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'posts' ? 'bold' : 'normal', cursor: 'pointer' }}>
+                            Posts & Announcements ({results.posts?.length || 0})
+                        </button>
+                        <button onClick={() => setActiveTab("events")} style={{ padding: '0.75rem 1.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'events' ? '2px solid var(--brand-primary)' : 'none', color: activeTab === 'events' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'events' ? 'bold' : 'normal', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Calendar size={18} /> Events ({results.events?.length || 0})
+                        </button>
+                        <button onClick={() => setActiveTab("users")} style={{ padding: '0.75rem 1.5rem', background: 'none', border: 'none', borderBottom: activeTab === 'users' ? '2px solid var(--brand-primary)' : 'none', color: activeTab === 'users' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'users' ? 'bold' : 'normal', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Users size={18} /> People ({results.users?.length || 0})
+                        </button>
+                    </div>
 
-                        {activeTab === 'posts' && (
-                            <div className="feed-container">
-                                {results.posts.length > 0 ? results.posts.map(notice => (
-                                    <NoticeCard key={notice._id} notice={notice} isSaved={false} onToggleSave={() => {}} onClick={() => navigate(`/notice/${notice._id}`)} />
-                                )) : <p>No posts found matching '{query}'.</p>}
+                    {activeTab === 'posts' && (
+                        <div className="feed-container">
+                            {results.posts.length > 0 ? (
+                                <>
+                                    {results.posts.map(notice => (
+                                        <NoticeCard key={notice._id} notice={notice} isSaved={false} onToggleSave={() => {}} onClick={() => navigate(`/notice/${notice._id}`)} />
+                                    ))}
+                                    {results.totalPages > 1 && (
+                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2rem' }}>
+                                            <button 
+                                                disabled={page === 1}
+                                                onClick={() => handleSearch(null, page - 1)}
+                                                style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', cursor: page === 1 ? 'not-allowed' : 'pointer', color: page === 1 ? 'var(--text-muted)' : 'var(--text-primary)' }}
+                                            >
+                                                Previous
+                                            </button>
+                                            <span style={{ display: 'flex', alignItems: 'center' }}>Page {page} of {results.totalPages}</span>
+                                            <button 
+                                                disabled={page === results.totalPages}
+                                                onClick={() => handleSearch(null, page + 1)}
+                                                style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', cursor: page === results.totalPages ? 'not-allowed' : 'pointer', color: page === results.totalPages ? 'var(--text-muted)' : 'var(--text-primary)' }}
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            ) : <p>No posts found.</p>}
                             </div>
                         )}
 
@@ -149,8 +196,7 @@ function SearchPage() {
 
                         {activeTab === 'users' && renderUsers()}
                     </div>
-                )
-            )}
+                )}
         </div>
     );
 }
