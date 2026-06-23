@@ -26,7 +26,6 @@ function DirectMessages() {
 
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [openMenuId, setOpenMenuId] = useState(null);
     const [editingMsg, setEditingMsg] = useState(null); // { _id, content }
@@ -173,10 +172,8 @@ function DirectMessages() {
         try {
             const data = await getConversations();
             setConversations(data);
-            setLoading(false);
         } catch (error) {
             console.error("Error fetching conversations:", error);
-            setLoading(false);
         }
     }, []);
 
@@ -255,6 +252,7 @@ function DirectMessages() {
                 socketRef.current.off("callEnded");
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUserId]);
 
     const handleFileChange = (e) => {

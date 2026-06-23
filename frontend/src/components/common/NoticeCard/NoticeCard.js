@@ -1,36 +1,19 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Bookmark, Heart, Send, MessageCircle, MoreHorizontal, AlertTriangle, Archive, Share2 } from 'lucide-react';
+import { Bookmark, Heart, MessageCircle, MoreHorizontal, AlertTriangle, Archive, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Badge from '../Badge/Badge';
 import './NoticeCard.css';
-import { toggleLikeNotice } from '../../../services/noticeService';
 import { useToast } from '../../../context/ToastContext';
 
 const NoticeCard = ({ notice, onClick, isSaved, onToggleSave }) => {
     const { showToast } = useToast();
-    const navigate = useNavigate();
     const [reactions, setReactions] = React.useState(notice.reactions || []);
     const [likeCount, setLikeCount] = React.useState(notice.likes?.length || 0);
     const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
-    const [isFollowing, setIsFollowing] = React.useState(false);
     const [showReactionPicker, setShowReactionPicker] = React.useState(false);
 
     // My reaction
     const myReaction = reactions.find(r => r.user === localStorage.getItem('userId'))?.type;
     const [userReaction, setUserReaction] = React.useState(myReaction);
-
-    React.useEffect(() => {
-        const fetchFollowingStatus = async () => {
-            try {
-                const following = await import('../../../services/authService').then(m => m.getFollowing());
-                setIsFollowing(following.some(f => f._id === notice.createdBy?._id || f._id === notice.author?._id));
-            } catch (err) { }
-        };
-        if (notice.createdBy || notice.author) {
-            fetchFollowingStatus();
-        }
-    }, [notice.createdBy, notice.author]);
 
     const isArchived = notice.isArchived || (notice.expiryDate && new Date(notice.expiryDate) < new Date());
 
@@ -63,19 +46,6 @@ const NoticeCard = ({ notice, onClick, isSaved, onToggleSave }) => {
         zap: '⚡',
         insightful: '💡',
         like: '👍'
-    };
-
-    const handleFollowClick = async (e) => {
-        e.stopPropagation();
-        try {
-            const authorId = notice.createdBy?._id || notice.author?._id;
-            if (!authorId) return;
-            const res = await import('../../../services/authService').then(m => m.toggleFollow(authorId));
-            setIsFollowing(res.isFollowing);
-            showToast(res.message, "success");
-        } catch (err) {
-            showToast("Failed to update follow status", "error");
-        }
     };
 
     const handleShareClick = async (e) => {

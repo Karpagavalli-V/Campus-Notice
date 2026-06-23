@@ -3,13 +3,11 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
     Home,
     Search,
-    Compass,
     MessageCircle,
     Bell,
     PlusSquare,
     User,
     LogOut,
-    Menu,
     Calendar,
     Archive,
     BarChart2,

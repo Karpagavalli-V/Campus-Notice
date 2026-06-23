@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Trophy, Medal, Award, User, Star } from "lucide-react";
+import { Trophy, Medal, Award, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getLeaderboard } from "../services/gamificationService";
 import Badge from "../components/common/Badge/Badge";

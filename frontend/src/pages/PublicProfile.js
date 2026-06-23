@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    User,
     Mail,
     Building,
-    Calendar,
     Clock,
     BookOpen,
     Linkedin,
     Twitter,
     Github,
     ChevronLeft,
-    Users,
     Activity
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { getPublicProfile, toggleFollow } from '../services/authService';
 import Button from '../components/common/Button/Button';
 import Badge from '../components/common/Badge/Badge';
@@ -31,6 +28,7 @@ const PublicProfile = () => {
 
     useEffect(() => {
         fetchProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchProfile = async () => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, Users, FileText, Activity, ShieldCheck } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { getAdminStats, createNewUser } from "../services/adminService";
 import { useToast } from "../context/ToastContext";
 import Button from "../components/common/Button/Button";

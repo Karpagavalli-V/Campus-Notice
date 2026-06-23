@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BellOff, X, Bell, CheckCircle2, Trash2 } from "lucide-react";
+import { BellOff, Bell, CheckCircle2, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyNotifications, markAllAsRead, markAsRead, deleteNotification } from "../services/notificationService";
 import Button from "../components/common/Button/Button";

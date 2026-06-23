@@ -451,6 +451,13 @@ exports.getNoticeById = async (req, res) => {
 // Admin / Faculty
 exports.deleteNotice = async (req, res) => {
   try {
+    const notice = await Notice.findById(req.params.id);
+    if (!notice) return res.status(404).json({ message: "Notice not found" });
+
+    if (notice.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Not authorized to delete this notice" });
+    }
+
     await Notice.findByIdAndDelete(req.params.id);
     res.json({ message: "Notice deleted successfully" });
   } catch (error) {

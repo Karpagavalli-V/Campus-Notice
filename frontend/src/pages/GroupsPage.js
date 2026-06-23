@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+
 import { Users, Plus, ArrowLeft, Send, Settings, Trash2, UserMinus, Edit2, Check, X } from "lucide-react";
 import api from "../services/apiService";
 import { useToast } from "../context/ToastContext";
@@ -9,7 +9,6 @@ import "../styles/DirectMessages.css";
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function GroupsPage() {
-    const navigate = useNavigate();
     const { showToast } = useToast();
     const [groups, setGroups] = useState([]);
     const [activeGroup, setActiveGroup] = useState(null);

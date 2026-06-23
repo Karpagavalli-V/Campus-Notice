@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Archive, Compass, Search, Filter, X, Trash2, Edit2, Check } from "lucide-react";
+import { Archive, Compass, Search, Filter, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getArchivedNotices } from "../services/noticeService";
 import NoticeCard from "../components/common/NoticeCard/NoticeCard";

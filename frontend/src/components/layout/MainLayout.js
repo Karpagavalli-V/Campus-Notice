@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import './MainLayout.css';
 
 const MainLayout = ({ children, userRole }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const isSidebarOpen = true;
     const [isDarkMode, setIsDarkMode] = useState(localStorage.getItem('theme') === 'dark');
 
     useEffect(() => {

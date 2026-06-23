@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const csv = require("csvtojson");
+const fs = require("fs");
 
 exports.createUser = async (req, res) => {
   try {
@@ -36,7 +37,23 @@ exports.bulkCreateUsers = async (req, res) => {
       return res.status(400).json({ message: "Please upload a CSV file" });
     }
 
-    const jsonArray = await csv().fromFile(req.file.path);
+    let jsonArray;
+    try {
+      jsonArray = await csv().fromFile(req.file.path);
+    } catch (err) {
+      if (req.file && req.file.path) {
+        fs.unlink(req.file.path, () => {});
+      }
+      return res.status(400).json({ message: "Failed to parse CSV file: " + err.message });
+    }
+
+    // Clean up the uploaded CSV file as it is no longer needed
+    if (req.file && req.file.path) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error("Error deleting bulk upload temp file:", err);
+      });
+    }
+
     const results = {
       success: 0,
       failed: 0,

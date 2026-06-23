@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Lock, User, Users, Shield, LogOut } from 'lucide-react';
+import { Camera, Lock, User, Users, Shield } from 'lucide-react';
 import api from '../services/apiService';
 import Button from '../components/common/Button/Button';
 import './ProfileSettings.css';
