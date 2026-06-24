@@ -1,5 +1,6 @@
 import React from 'react';
 import { GraduationCap, Sun, Moon, Menu } from 'lucide-react';
+import { API_BASE_URL } from '../../config/env';
 import Badge from '../common/Badge/Badge';
 import Button from '../common/Button/Button';
 import NotificationBell from './NotificationBell';
@@ -52,7 +53,7 @@ const Navbar = ({ userRole, toggleSidebar }) => {
                 <NotificationBell />
                 <div className="nav-profile-image">
                     {localStorage.getItem('profilePic') ? (
-                        <img src={`http://localhost:5000${localStorage.getItem('profilePic')}`} alt="User" />
+                        <img src={`${API_BASE_URL}${localStorage.getItem('profilePic')}`} alt="User" />
                     ) : (
                         <Badge variant="secondary" className="role-badge">
                             {userRole}

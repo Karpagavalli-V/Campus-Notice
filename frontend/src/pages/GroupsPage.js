@@ -4,9 +4,8 @@ import { Users, Plus, ArrowLeft, Send, Settings, Trash2, UserMinus, Edit2, Check
 import api from "../services/apiService";
 import { useToast } from "../context/ToastContext";
 import Button from "../components/common/Button/Button";
+import { API_BASE_URL } from "../config/env";
 import "../styles/DirectMessages.css";
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function GroupsPage() {
     const { showToast } = useToast();
@@ -146,7 +145,7 @@ function GroupsPage() {
     );
 
     const avatarFor = (user) => {
-        if (user?.profilePic) return <img src={`${API_BASE}${user.profilePic}`} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />;
+        if (user?.profilePic) return <img src={`${API_BASE_URL}${user.profilePic}`} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />;
         return <span>{user?.name?.[0]?.toUpperCase() || '?'}</span>;
     };
 

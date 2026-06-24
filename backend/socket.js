@@ -2,10 +2,17 @@ const socketIo = require("socket.io");
 
 let io;
 
+// Parse allowed origins from FRONTEND_URL (supports comma-separated list)
+const getAllowedOrigins = () => {
+    return (process.env.FRONTEND_URL || "http://localhost:3000")
+        .split(",")
+        .map((origin) => origin.trim());
+};
+
 exports.init = (server) => {
     io = socketIo(server, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: getAllowedOrigins(),
             methods: ["GET", "POST"],
         },
     });

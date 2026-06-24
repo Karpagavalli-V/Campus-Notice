@@ -16,6 +16,7 @@ import { getPublicProfile, toggleFollow } from '../services/authService';
 import Button from '../components/common/Button/Button';
 import Badge from '../components/common/Badge/Badge';
 import NoticeCard from '../components/common/NoticeCard/NoticeCard';
+import { API_BASE_URL } from '../config/env';
 import '../styles/Dashboard.css';
 
 const PublicProfile = () => {
@@ -84,7 +85,7 @@ const PublicProfile = () => {
             <motion.section variants={itemVariants} className="profile-header-card" style={{ background: 'var(--card-bg)', borderRadius: 'var(--radius-lg)', padding: '2.5rem', border: '1px solid var(--border-color)', marginBottom: '2rem', display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div className="profile-avatar-large" style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'var(--gaming-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', border: '4px solid var(--card-bg)', boxShadow: 'var(--shadow-lg)' }}>
                     {user.profilePic ? (
-                        <img src={`http://localhost:5000${user.profilePic}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={`${API_BASE_URL}${user.profilePic}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                         user.name?.[0].toUpperCase()
                     )}

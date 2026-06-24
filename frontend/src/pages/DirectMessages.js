@@ -4,6 +4,8 @@ import { MessageSquare, ArrowLeft, Send, Sparkles, MoreVertical, Edit, Trash2, X
 import { motion, AnimatePresence } from "framer-motion";
 import { getConversations, getConversation, sendMessage, updateMessage, deleteMessage } from "../services/messageService";
 import { initSocket } from "../services/socketService";
+import api from "../services/apiService";
+import { API_BASE_URL } from "../config/env";
 import { useToast } from "../context/ToastContext";
 import Button from "../components/common/Button/Button";
 import "../styles/DirectMessages.css";
@@ -126,12 +128,9 @@ function DirectMessages() {
     useEffect(() => {
         const fetchMe = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/auth/user/${currentUserId}`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                });
-                const data = await response.json();
-                setCurrentUser(data);
-                setTempStatus(data.status || "");
+                const response = await api.get(`/auth/user/${currentUserId}`);
+                setCurrentUser(response.data);
+                setTempStatus(response.data.status || "");
             } catch (err) { console.error("Error fetching me:", err); }
         };
         fetchMe();
@@ -140,14 +139,7 @@ function DirectMessages() {
     const handleUpdateStatus = async (e) => {
         e.preventDefault();
         try {
-            await fetch(`http://localhost:5000/api/auth/status`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ status: tempStatus })
-            });
+            await api.put('/auth/status', { status: tempStatus });
             setCurrentUser(prev => ({ ...prev, status: tempStatus }));
             setIsStatusModalOpen(false);
             showToast("Status updated!", "success");
@@ -158,11 +150,8 @@ function DirectMessages() {
 
     const fetchAllUsers = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/auth/all`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            const data = await response.json();
-            setAllUsers(data.filter(u => u._id !== currentUserId));
+            const response = await api.get('/auth/all');
+            setAllUsers(response.data.filter(u => u._id !== currentUserId));
         } catch (err) {
             console.error("Error fetching directory:", err);
         }
@@ -370,7 +359,7 @@ function DirectMessages() {
                             </header>
                             <div className="status-section">
                                 <div className="avatar-circle xlg" style={{ margin: '0 auto 30px' }}>
-                                    {currentUser?.profilePic ? <img src={`http://localhost:5000${currentUser.profilePic}`} alt="" className="avatar-img" /> : currentUser?.name?.charAt(0).toUpperCase()}
+                                    {currentUser?.profilePic ? <img src={`${API_BASE_URL}${currentUser.profilePic}`} alt="" className="avatar-img" /> : currentUser?.name?.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="status-label">Your Name</div>
                                 <div className="status-value">{currentUser?.name}</div>
@@ -400,7 +389,7 @@ function DirectMessages() {
                                     <div key={user._id} className="conversation-item" onClick={() => handleSelectUser(user._id, user)}>
                                         <div className="conv-content">
                                             <div className="avatar-circle">
-                                                {user.profilePic ? <img src={`http://localhost:5000${user.profilePic}`} alt="" className="avatar-img" /> : user.name.charAt(0).toUpperCase()}
+                                                {user.profilePic ? <img src={`${API_BASE_URL}${user.profilePic}`} alt="" className="avatar-img" /> : user.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="conv-details">
                                                 <span className="conversation-user">{user.name}</span>
@@ -417,7 +406,7 @@ function DirectMessages() {
                 <div className="sidebar-header">
                     <div className="profile-actions">
                         <div className="avatar-circle sm" onClick={() => setIsStatusModalOpen(true)} style={{ cursor: 'pointer' }}>
-                            {currentUser?.profilePic ? <img src={`http://localhost:5000${currentUser.profilePic}`} alt="" className="avatar-img" /> : currentUser?.name?.charAt(0).toUpperCase()}
+                            {currentUser?.profilePic ? <img src={`${API_BASE_URL}${currentUser.profilePic}`} alt="" className="avatar-img" /> : currentUser?.name?.charAt(0).toUpperCase()}
                         </div>
                         <div className="header-icons">
                             <motion.button onClick={() => navigate(-1)} title="Back to Campus"><ArrowLeft size={22} /></motion.button>
@@ -438,7 +427,7 @@ function DirectMessages() {
                         filteredConversations.map((conv) => (
                             <motion.div key={conv.user._id} variants={itemVariants} whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.03)" }} className={`conversation-item ${activeConversation?._id === conv.user._id ? 'active' : ''}`} onClick={() => handleSelectUser(conv.user._id, conv.user)}>
                                 <div className="conv-content">
-                                    <div className="avatar-circle">{conv.user.profilePic ? <img src={`http://localhost:5000${conv.user.profilePic}`} alt="" className="avatar-img" /> : conv.user.name.charAt(0).toUpperCase()}</div>
+                                    <div className="avatar-circle">{conv.user.profilePic ? <img src={`${API_BASE_URL}${conv.user.profilePic}`} alt="" className="avatar-img" /> : conv.user.name.charAt(0).toUpperCase()}</div>
                                     <div className="conv-details">
                                         <div className="conv-row">
                                             <span className="conversation-user">{conv.user.name}</span>
@@ -469,7 +458,7 @@ function DirectMessages() {
                 {activeCall && (
                     <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="call-overlay">
                         <div className="call-info">
-                            <div className="avatar-circle lg">{activeCall.user.profilePic ? <img src={`http://localhost:5000${activeCall.user.profilePic}`} alt="" className="avatar-img" /> : activeCall.user.name?.charAt(0).toUpperCase()}</div>
+                            <div className="avatar-circle lg">{activeCall.user.profilePic ? <img src={`${API_BASE_URL}${activeCall.user.profilePic}`} alt="" className="avatar-img" /> : activeCall.user.name?.charAt(0).toUpperCase()}</div>
                             <h2>{activeCall.user.name}</h2>
                             <p className="calling-status">
                                 {activeCall.status === 'connecting' && 'Connecting...'}
@@ -503,7 +492,7 @@ function DirectMessages() {
                             <header className="chat-header">
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, cursor: 'pointer' }} onClick={openContactInfo}>
                                     <button className="back-btn-mobile" onClick={(e) => { e.stopPropagation(); setActiveConversation(null); }}><ArrowLeft size={20} /></button>
-                                    <div className="avatar-circle sm">{activeConversation.profilePic ? <img src={`http://localhost:5000${activeConversation.profilePic}`} alt="" className="avatar-img" /> : activeConversation.name?.charAt(0).toUpperCase()}</div>
+                                    <div className="avatar-circle sm">{activeConversation.profilePic ? <img src={`${API_BASE_URL}${activeConversation.profilePic}`} alt="" className="avatar-img" /> : activeConversation.name?.charAt(0).toUpperCase()}</div>
                                     <div className="header-info"><h3>{activeConversation.name}</h3><span className="online-status">online</span></div>
                                 </div>
                                 {isChatSearchOpen ? (
@@ -550,7 +539,7 @@ function DirectMessages() {
                                                     )}
                                                     {msg.mediaUrl && (
                                                         <div className="msg-media-bubble">
-                                                            <img src={`http://localhost:5000${msg.mediaUrl}`} alt="media" className="msg-media-img" />
+                                                            <img src={`${API_BASE_URL}${msg.mediaUrl}`} alt="media" className="msg-media-img" />
                                                         </div>
                                                     )}
                                                     {isEditing ? (
@@ -651,7 +640,7 @@ function DirectMessages() {
                             </header>
                             <div className="drawer-content">
                                 <div className="contact-info-card">
-                                    <div className="avatar-circle xlg">{activeConversation.profilePic ? <img src={`http://localhost:5000${activeConversation.profilePic}`} alt="" className="avatar-img" /> : activeConversation.name?.charAt(0).toUpperCase()}</div>
+                                    <div className="avatar-circle xlg">{activeConversation.profilePic ? <img src={`${API_BASE_URL}${activeConversation.profilePic}`} alt="" className="avatar-img" /> : activeConversation.name?.charAt(0).toUpperCase()}</div>
                                     <h2 className="contact-info-name">{activeConversation.name}</h2>
                                     <p className="contact-info-role">{activeConversation.role}</p>
                                 </div>
@@ -664,7 +653,7 @@ function DirectMessages() {
                                     <div className="media-gallery-grid">
                                         {messages.filter(m => m.mediaUrl).slice(-6).map((m, i) => (
                                             <div key={i} className="gallery-item">
-                                                <img src={`http://localhost:5000${m.mediaUrl}`} alt="" />
+                                                <img src={`${API_BASE_URL}${m.mediaUrl}`} alt="" />
                                             </div>
                                         ))}
                                         {messages.filter(m => m.mediaUrl).length === 0 && <div className="section-value link">No media shared yet</div>}

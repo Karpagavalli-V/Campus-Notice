@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Lock, User, Users, Shield } from 'lucide-react';
 import api from '../services/apiService';
 import Button from '../components/common/Button/Button';
+import { API_BASE_URL } from '../config/env';
 import './ProfileSettings.css';
 
 const ProfileSettings = () => {
@@ -177,7 +178,7 @@ const ProfileSettings = () => {
                             >
                                 {previewUrl ? (
                                     <img
-                                        src={previewUrl.startsWith('blob:') ? previewUrl : `http://localhost:5000${previewUrl}`}
+                                        src={previewUrl.startsWith('blob:') ? previewUrl : `${API_BASE_URL}${previewUrl}`}
                                         alt="ProfilePreview"
                                     />
                                 ) : (

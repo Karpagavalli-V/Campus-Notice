@@ -6,8 +6,7 @@ import Button from "../components/common/Button/Button";
 import Badge from "../components/common/Badge/Badge";
 import ConfirmDialog from "../components/common/ConfirmDialog/ConfirmDialog";
 import "../styles/Dashboard.css";
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { API_BASE_URL } from "../config/env";
 
 
 function ManageUsers() {
@@ -134,7 +133,7 @@ function ManageUsers() {
                 <td>
                   <div className="user-table-avatar">
                     {u.profilePic ? (
-                  <img src={`${API_BASE}${u.profilePic}`} alt="" />
+                  <img src={`${API_BASE_URL}${u.profilePic}`} alt="" />
                     ) : (
                       <span>{u.name?.[0]?.toUpperCase()}</span>
                     )}

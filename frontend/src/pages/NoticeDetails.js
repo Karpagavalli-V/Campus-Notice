@@ -25,9 +25,8 @@ import Badge from "../components/common/Badge/Badge";
 import Button from "../components/common/Button/Button";
 import MarkdownContent from "../components/common/MarkdownContent";
 import { useToast } from "../context/ToastContext";
+import { API_BASE_URL } from "../config/env";
 import "../styles/Dashboard.css";
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function NoticeDetails() {
   const { id } = useParams();
@@ -469,7 +468,7 @@ function NoticeDetails() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
                             transition={{ duration: 0.3 }}
-                            src={`${API_BASE}${images[currentSlide].url}`}
+                            src={`${API_BASE_URL}${images[currentSlide].url}`}
                             alt={`Notice Poster ${currentSlide + 1}`}
                             style={{ width: '100%', height: 'auto', maxHeight: '600px', objectFit: 'contain', display: 'block', margin: '0 auto' }}
                           />
@@ -522,7 +521,7 @@ function NoticeDetails() {
                         {docs.map((file, idx) => (
                           <a
                             key={idx}
-                            href={`${API_BASE}${file.url}`}
+                            href={`${API_BASE_URL}${file.url}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="attachment-link"
@@ -676,7 +675,7 @@ function NoticeDetails() {
                       >
                         {viewer.profilePic ? (
                           <img
-                            src={`${API_BASE}${viewer.profilePic}`}
+                            src={`${API_BASE_URL}${viewer.profilePic}`}
                             alt={viewer.name}
                             className="viewer-avatar"
                           />

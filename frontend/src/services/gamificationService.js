@@ -1,20 +1,12 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/gamification";
+import api from "./apiService";
 
 const getLeaderboard = async (role = "") => {
-    const token = localStorage.getItem("token");
-    const response = await axios.get(`${API_URL}/leaderboard?role=${role}`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await api.get(`/gamification/leaderboard?role=${role}`);
     return response.data;
 };
 
 const getMyXP = async () => {
-    const token = localStorage.getItem("token");
-    const response = await axios.get(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await api.get("/gamification/me");
     return response.data;
 };
 

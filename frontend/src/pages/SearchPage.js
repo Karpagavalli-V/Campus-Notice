@@ -4,8 +4,7 @@ import api from "../services/apiService";
 import { useNavigate } from "react-router-dom";
 import NoticeCard from "../components/common/NoticeCard/NoticeCard";
 import "../styles/Dashboard.css"; // Reuse dashboard styles
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { API_BASE_URL } from "../config/env";
 
 
 function SearchPage() {
@@ -48,7 +47,7 @@ function SearchPage() {
                     <div key={user._id} className="user-card" style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--card-bg)' }}>
                         <div className="avatar-circle">
                             {user.profilePic ? (
-                                <img src={`${API_BASE}${user.profilePic}`} alt="avatar" className="avatar-img" />
+                                <img src={`${API_BASE_URL}${user.profilePic}`} alt="avatar" className="avatar-img" />
                             ) : (
                                 <Users size={24} />
                             )}

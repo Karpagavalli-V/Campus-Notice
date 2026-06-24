@@ -4,8 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getLeaderboard } from "../services/gamificationService";
 import Badge from "../components/common/Badge/Badge";
 import "../styles/Leaderboard.css";
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { API_BASE_URL } from "../config/env";
 
 const Leaderboard = () => {
     const [topStudents, setTopStudents] = useState([]);
@@ -68,7 +67,7 @@ const Leaderboard = () => {
                         </div>
                         <div className="podium-avatar">
                             {user.profilePic ? (
-                                <img src={`${API_BASE}${user.profilePic}`} alt={user.name} />
+                                <img src={`${API_BASE_URL}${user.profilePic}`} alt={user.name} />
                             ) : (
                                 <span>{user.name[0].toUpperCase()}</span>
                             )}
@@ -144,7 +143,7 @@ const Leaderboard = () => {
                                         <td className="user-cell">
                                             <div className="avatar-sm">
                                                 {user.profilePic ? (
-                                                    <img src={`${API_BASE}${user.profilePic}`} alt="" />
+                                                    <img src={`${API_BASE_URL}${user.profilePic}`} alt="" />
                                                 ) : (
                                                     user.name[0].toUpperCase()
                                                 )}

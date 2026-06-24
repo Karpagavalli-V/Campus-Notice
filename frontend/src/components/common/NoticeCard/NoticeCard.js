@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bookmark, Heart, MessageCircle, MoreHorizontal, AlertTriangle, Archive, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE_URL } from '../../../config/env';
 import './NoticeCard.css';
 import { useToast } from '../../../context/ToastContext';
 
@@ -156,7 +157,7 @@ const NoticeCard = ({ notice, onClick, isSaved, onToggleSave }) => {
                             style={{ position: 'relative', width: '100%', borderRadius: '16px', overflow: 'hidden', backgroundColor: 'var(--bg-color)', aspectRatio: '16/9' }}
                         >
                             <img
-                                src={`http://localhost:5000${images[currentImageIndex].url}`}
+                                src={`${API_BASE_URL}${images[currentImageIndex].url}`}
                                 alt="Notice Attachment"
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />

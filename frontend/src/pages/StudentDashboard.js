@@ -4,6 +4,8 @@ import { Bookmark, Newspaper, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getNotices, getSavedNotices, toggleSaveNotice } from "../services/noticeService";
 import { toggleFollow, getFollowing } from "../services/authService";
+import api from "../services/apiService";
+import { API_BASE_URL } from "../config/env";
 import { useToast } from "../context/ToastContext";
 import NoticeCard from "../components/common/NoticeCard/NoticeCard";
 import NoticeStories from "../components/common/NoticeStories/NoticeStories";
@@ -58,10 +60,8 @@ function StudentDashboard() {
   
   const fetchSuggested = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/all", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      const data = await response.json();
+      const response = await api.get('/auth/all');
+      const data = response.data;
       const currentUserId = localStorage.getItem("userId");
       const suggested = data.filter(u => u._id !== currentUserId && !followingIds.includes(u._id))
                             .sort(() => 0.5 - Math.random()) // Shuffle
@@ -253,7 +253,7 @@ function StudentDashboard() {
                   <div key={user._id} className="suggestion-user-item">
                       <div className="s-user-info" onClick={() => navigate(`/user/${user._id}`)}>
                           <div className="s-avatar">
-                              {user.profilePic ? <img src={`http://localhost:5000${user.profilePic}`} alt="" /> : user.name.charAt(0).toUpperCase()}
+                              {user.profilePic ? <img src={`${API_BASE_URL}${user.profilePic}`} alt="" /> : user.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="s-details">
                               <span className="s-name">{user.name}</span>
