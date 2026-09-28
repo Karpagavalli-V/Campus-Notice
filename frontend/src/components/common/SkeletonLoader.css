@@ -1,0 +1,96 @@
+.skeleton-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.skeleton-wrapper {
+    width: 100%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -468px 0;
+    }
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.skeleton-card, .skeleton-text-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    width: 100%;
+}
+
+.skeleton-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.skeleton-title {
+    height: 20px;
+    width: 40%;
+    border-radius: 4px;
+}
+
+.skeleton-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-line {
+    height: 12px;
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-line.short {
+    width: 60%;
+}
+
+/* Shimmer Effect Applied to inner skeleton items */
+.skeleton-avatar, .skeleton-title, .skeleton-line {
+    background: #f6f7f8;
+    background-image: linear-gradient(
+        to right,
+        #f6f7f8 0%,
+        #edeef1 20%,
+        #f6f7f8 40%,
+        #f6f7f8 100%
+    );
+    background-repeat: no-repeat;
+    background-size: 800px 104px; 
+    animation-duration: 1.5s;
+    animation-fill-mode: forwards; 
+    animation-iteration-count: infinite;
+    animation-name: shimmer;
+    animation-timing-function: linear;
+}
+
+/* Dark mode overrides for shimmer */
+:root.dark-mode .skeleton-avatar,
+:root.dark-mode .skeleton-title,
+:root.dark-mode .skeleton-line {
+    background: #1e1e2d;
+    background-image: linear-gradient(
+        to right,
+        #1e1e2d 0%,
+        #2a2a3c 20%,
+        #1e1e2d 40%,
+        #1e1e2d 100%
+    );
+}

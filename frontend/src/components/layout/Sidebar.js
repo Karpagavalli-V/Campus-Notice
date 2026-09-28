@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 import {
     Home,
     Search,
@@ -19,8 +21,10 @@ import {
 } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
+const Sidebar = ({ userRole, isOpen }) => {
     const navigate = useNavigate();
+    const { theme, toggleTheme } = useTheme();
+    const isDarkMode = theme === 'dark';
     const [deferredPrompt, setDeferredPrompt] = useState(null);
 
     useEffect(() => {
@@ -95,7 +99,12 @@ const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
             <nav className="sidebar-nav">
                 <ul className="nav-list">
                     {links.map((link) => (
-                        <li key={link.path} className="nav-item">
+                        <motion.li 
+                            key={link.path} 
+                            className="nav-item"
+                            whileHover={{ x: 5, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
                             <NavLink
                                 to={link.path}
                                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
@@ -103,7 +112,7 @@ const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
                                 <span className="nav-icon">{link.icon}</span>
                                 <span className="nav-text">{link.label}</span>
                             </NavLink>
-                        </li>
+                        </motion.li>
                     ))}
                 </ul>
             </nav>
@@ -115,12 +124,17 @@ const Sidebar = ({ userRole, isOpen, isDarkMode, onToggleTheme }) => {
                         <span className="nav-text">Install App</span>
                     </div>
                 )}
-                <div className="nav-link theme-btn" onClick={onToggleTheme}>
+                <motion.div 
+                    className="nav-link theme-btn" 
+                    onClick={toggleTheme}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
                     <span className="nav-icon">
                         {isDarkMode ? <Sun size={28} /> : <Moon size={28} />}
                     </span>
                     <span className="nav-text">{isDarkMode ? 'Light' : 'Dark'}</span>
-                </div>
+                </motion.div>
                 <button className="nav-link logout-btn" onClick={handleLogout}>
                     <span className="nav-icon"><LogOut size={28} /></span>
                     <span className="nav-text">Logout</span>

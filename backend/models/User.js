@@ -113,6 +113,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Hey there! I am using Campus Notice.",
     },
+    pushSubscription: {
+      type: Object,
+      default: null,
+    },
   },
   { timestamps: true }
 );

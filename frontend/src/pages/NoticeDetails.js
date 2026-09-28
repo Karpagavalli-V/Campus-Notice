@@ -566,7 +566,14 @@ function NoticeDetails() {
 
           <div className="comments-list">
             {notice.comments?.map((comment, idx) => (
-              <div key={idx} className="comment-item" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+              <motion.div 
+                key={idx} 
+                className="comment-item" 
+                style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+              >
                 <div className="comment-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span className="comment-user" style={{ fontWeight: 600 }}>{comment.userName}</span>
                   <span className="comment-date" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{new Date(comment.createdAt).toLocaleDateString()}</span>
@@ -623,7 +630,7 @@ function NoticeDetails() {
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
             {(!notice.comments || notice.comments.length === 0) && (
               <p className="no-comments" style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '2rem' }}>No comments yet. Be the first to ask!</p>

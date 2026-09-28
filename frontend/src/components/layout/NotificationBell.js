@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
+import { motion } from "framer-motion";
 import { getMyNotifications, markAsRead, markAllAsRead } from "../../services/notificationService";
 import "./NotificationBell.css";
 
@@ -68,12 +69,17 @@ const NotificationBell = () => {
 
     return (
         <div className="notification-bell-container" ref={dropdownRef}>
-            <div className="bell-icon-wrapper" onClick={() => setShowDropdown(!showDropdown)}>
+            <motion.div 
+                className="bell-icon-wrapper" 
+                onClick={() => setShowDropdown(!showDropdown)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+            >
                 <span className="bell-icon">
                     <Bell size={20} />
                 </span>
                 {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
-            </div>
+            </motion.div>
 
             {showDropdown && (
                 <div className="notification-dropdown">

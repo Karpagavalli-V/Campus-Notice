@@ -9,6 +9,7 @@ import { API_BASE_URL } from "../config/env";
 import { useToast } from "../context/ToastContext";
 import NoticeCard from "../components/common/NoticeCard/NoticeCard";
 import NoticeStories from "../components/common/NoticeStories/NoticeStories";
+import SkeletonLoader from "../components/common/SkeletonLoader";
 import "../styles/Dashboard.css";
 
 function StudentDashboard() {
@@ -129,9 +130,9 @@ function StudentDashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="dashboard-loading"
+        style={{ width: '100%', padding: '2rem' }}
       >
-        <div className="loader"></div>
-        <p>Fetching latest notices...</p>
+        <SkeletonLoader count={3} />
       </motion.div>
     );
   }

@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { ToastProvider } from "./context/ToastContext";
 
 import Login from "./pages/Login";
@@ -26,16 +27,31 @@ import ResetPassword from "./pages/ResetPassword";
 import Leaderboard from "./pages/Leaderboard";
 import PublicProfile from "./pages/PublicProfile";
 
-function App() {
+const pageTransition = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+  transition: { duration: 0.3 }
+};
+
+const PageWrapper = ({ children }) => (
+  <motion.div initial="initial" animate="animate" exit="exit" variants={pageTransition}>
+    {children}
+  </motion.div>
+);
+
+function AnimatedRoutes() {
+  const location = useLocation();
+  
   return (
-    <ToastProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<AboutPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+
+        <Route path="/" element={<PageWrapper><AboutPage /></PageWrapper>} />
+        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
+        <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
+        <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+        <Route path="/reset-password/:token" element={<PageWrapper><ResetPassword /></PageWrapper>} />
 
           <Route
             path="/admin"
@@ -190,8 +206,17 @@ function App() {
             }
           />
 
-          <Route path="/unauthorized" element={<Unauthorized />} />
-        </Routes>
+        <Route path="/unauthorized" element={<PageWrapper><Unauthorized /></PageWrapper>} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <BrowserRouter>
+        <AnimatedRoutes />
       </BrowserRouter>
     </ToastProvider>
   );
