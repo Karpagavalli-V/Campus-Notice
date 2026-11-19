@@ -21,9 +21,19 @@ const path = require("path");
 // ... imports
 
 // Parse allowed origins from FRONTEND_URL (supports comma-separated list)
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
+const defaultOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  "http://127.0.0.1:3002",
+];
+const envOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
-  .map((origin) => origin.trim());
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
 
 // Middleware
 app.use(helmet());
@@ -33,7 +43,10 @@ app.use(
     origin: function (origin, callback) {
       // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      if (
+        allowedOrigins.includes(origin) ||
+        (process.env.NODE_ENV !== "production" && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))
+      ) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
@@ -49,8 +62,8 @@ app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 // Rate Limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again after 15 minutes",
+  max: process.env.NODE_ENV === "production" ? 100 : 1000, // Higher limit for development
+  message: { message: "Too many requests from this IP, please try again after 15 minutes" },
 });
 app.use("/api/", apiLimiter);
 

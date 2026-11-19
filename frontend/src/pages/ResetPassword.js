@@ -40,7 +40,15 @@ function ResetPassword() {
             setDone(true);
             setTimeout(() => navigate("/login"), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || "Reset failed. The link may have expired.");
+            console.error("Reset password error:", err);
+            const serverMsg = err.response?.data?.message || (typeof err.response?.data === "string" ? err.response.data : null);
+            if (serverMsg) {
+                setError(serverMsg);
+            } else if (err.code === "ERR_NETWORK" || err.message === "Network Error") {
+                setError("Cannot connect to server. Please ensure the backend is running on port 5000.");
+            } else {
+                setError(err.message || "Reset failed. The link may have expired.");
+            }
         } finally {
             setLoading(false);
         }

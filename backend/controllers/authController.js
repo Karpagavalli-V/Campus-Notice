@@ -180,7 +180,12 @@ exports.changePassword = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!email || !email.trim()) {
+      return res.status(400).json({ message: "Please provide an email address." });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
 
     // Always return success for security (don't reveal if email exists)
     if (!user) {
@@ -196,46 +201,74 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // Reset link pointing to frontend
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
+    const rawFrontendUrl = (process.env.FRONTEND_URL || "http://localhost:3000").split(",")[0].trim();
+    const resetLink = `${rawFrontendUrl}/reset-password/${resetToken}`;
 
-    const transporter = createTransporter();
+    const isEmailConfigured =
+      process.env.EMAIL_USER &&
+      process.env.EMAIL_PASS &&
+      !process.env.EMAIL_USER.includes("your_gmail") &&
+      !process.env.EMAIL_PASS.includes("your_gmail");
 
-    await transporter.sendMail({
-      from: `"Campus Notice" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: "🔑 Reset Your Campus Notice Password",
-      html: `
-        <div style="font-family: 'Segoe UI', sans-serif; max-width: 520px; margin: 0 auto; background: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
-          <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 32px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">
-              📢 Campus Notice
-            </h1>
-            <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 14px;">Password Reset Request</p>
-          </div>
-          <div style="padding: 36px 32px;">
-            <p style="color: #1e293b; font-size: 16px; margin: 0 0 12px;">Hi <strong>${user.name}</strong>,</p>
-            <p style="color: #475569; font-size: 14px; line-height: 1.7; margin: 0 0 28px;">
-              We received a request to reset your Campus Notice password. Click the button below to set a new password. This link expires in <strong>15 minutes</strong>.
-            </p>
-            <div style="text-align: center; margin-bottom: 28px;">
-              <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px;">
-                Reset My Password
-              </a>
+    if (!isEmailConfigured) {
+      console.log(`\n======================================================`);
+      console.log(`🔑 PASSWORD RESET LINK (Dev Mode / Email Not Configured):`);
+      console.log(`👤 User: ${user.email}`);
+      console.log(`🔗 Link: ${resetLink}`);
+      console.log(`======================================================\n`);
+
+      return res.json({
+        message: "If an account exists with this email, a reset link has been sent.",
+        devResetLink: resetLink,
+      });
+    }
+
+    try {
+      const transporter = createTransporter();
+
+      await transporter.sendMail({
+        from: `"Campus Notice" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        subject: "🔑 Reset Your Campus Notice Password",
+        html: `
+          <div style="font-family: 'Segoe UI', sans-serif; max-width: 520px; margin: 0 auto; background: #f8fafc; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+            <div style="background: linear-gradient(135deg, #7c3aed, #06b6d4); padding: 32px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">
+                📢 Campus Notice
+              </h1>
+              <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 14px;">Password Reset Request</p>
             </div>
-            <p style="color: #94a3b8; font-size: 12px; line-height: 1.6; margin: 0; border-top: 1px solid #e2e8f0; padding-top: 20px;">
-              If you didn't request this, you can safely ignore this email. Your password won't change.<br/>
-              For security, this link will expire in 15 minutes.
-            </p>
+            <div style="padding: 36px 32px;">
+              <p style="color: #1e293b; font-size: 16px; margin: 0 0 12px;">Hi <strong>${user.name}</strong>,</p>
+              <p style="color: #475569; font-size: 14px; line-height: 1.7; margin: 0 0 28px;">
+                We received a request to reset your Campus Notice password. Click the button below to set a new password. This link expires in <strong>15 minutes</strong>.
+              </p>
+              <div style="text-align: center; margin-bottom: 28px;">
+                <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px;">
+                  Reset My Password
+                </a>
+              </div>
+              <p style="color: #94a3b8; font-size: 12px; line-height: 1.6; margin: 0; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                If you didn't request this, you can safely ignore this email. Your password won't change.<br/>
+                For security, this link will expire in 15 minutes.
+              </p>
+            </div>
           </div>
-        </div>
-      `,
-    });
+        `,
+      });
 
-    res.json({ message: "If an account exists with this email, a reset link has been sent." });
+      return res.json({ message: "If an account exists with this email, a reset link has been sent." });
+    } catch (mailError) {
+      console.error("Nodemailer send error:", mailError);
+      console.log(`\n🔑 Reset link fallback: ${resetLink}\n`);
+      return res.status(500).json({
+        message: "Failed to send email. Check EMAIL_USER and EMAIL_PASS in backend/.env.",
+        devResetLink: resetLink,
+      });
+    }
   } catch (error) {
     console.error("Forgot password error:", error);
-    res.status(500).json({ message: "Failed to send reset email. Please try again." });
+    res.status(500).json({ message: error.message || "Failed to process password reset request." });
   }
 };
 

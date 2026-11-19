@@ -9,6 +9,7 @@ import "../styles/AuthLayout.css";
 function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
+    const [devResetLink, setDevResetLink] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -16,12 +17,27 @@ function ForgotPassword() {
         e.preventDefault();
         setError("");
         setMessage("");
+        setDevResetLink("");
         setLoading(true);
         try {
             const res = await api.post("/auth/forgot-password", { email });
             setMessage(res.data.message);
+            if (res.data.devResetLink) {
+                setDevResetLink(res.data.devResetLink);
+            }
         } catch (err) {
-            setError(err.response?.data?.message || "An error occurred. Please try again later.");
+            console.error("Forgot password error:", err);
+            if (err.response?.data?.devResetLink) {
+                setDevResetLink(err.response.data.devResetLink);
+            }
+            const serverMsg = err.response?.data?.message || (typeof err.response?.data === "string" ? err.response.data : null);
+            if (serverMsg) {
+                setError(serverMsg);
+            } else if (err.code === "ERR_NETWORK" || err.message === "Network Error") {
+                setError("Cannot connect to the backend server. Please verify your backend is running on port 5000.");
+            } else {
+                setError(err.message || "An error occurred. Please try again later.");
+            }
         } finally {
             setLoading(false);
         }
@@ -89,7 +105,20 @@ function ForgotPassword() {
                                 className="status-alert error" 
                                 style={{ marginBottom: '1.5rem' }}
                             >
-                                {error}
+                                <p>{error}</p>
+                                {devResetLink && (
+                                    <div style={{ marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                        <p style={{ fontSize: '0.8rem', opacity: 0.9, marginBottom: '0.3rem' }}>
+                                            🛠️ Dev fallback:
+                                        </p>
+                                        <Link 
+                                            to={devResetLink.replace(/^https?:\/\/[^/]+/, '')}
+                                            style={{ color: '#fff', textDecoration: 'underline', fontWeight: 600, fontSize: '0.85rem' }}
+                                        >
+                                            Reset Password directly here →
+                                        </Link>
+                                    </div>
+                                )}
                             </motion.div>
                         )}
                         {message && (
@@ -102,7 +131,20 @@ function ForgotPassword() {
                                 className="status-alert success" 
                                 style={{ marginBottom: '1.5rem' }}
                             >
-                                {message}
+                                <p>{message}</p>
+                                {devResetLink && (
+                                    <div style={{ marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                                        <p style={{ fontSize: '0.8rem', opacity: 0.9, marginBottom: '0.3rem' }}>
+                                            🛠️ Development Reset Link:
+                                        </p>
+                                        <Link 
+                                            to={devResetLink.replace(/^https?:\/\/[^/]+/, '')}
+                                            style={{ color: '#fff', textDecoration: 'underline', fontWeight: 600, fontSize: '0.85rem' }}
+                                        >
+                                            Reset Password directly here →
+                                        </Link>
+                                    </div>
+                                )}
                             </motion.div>
                         )}
                     </AnimatePresence>
